@@ -1,0 +1,78 @@
+{
+  "generated_at": "2026-11-05T20:43:22.779034+00:00",
+  "mode": "public",
+  "summary": {
+    "provider_incidents": 51,
+    "downstream_incidents": 63,
+    "named_accounts": 18,
+    "provider_mention_accounts": 33,
+    "attributed_incidents": 22,
+    "attributed_incidents_90d": 5,
+    "named_accounts_90d": 4,
+    "status_pages_found": 67,
+    "domains_probed": 120,
+    "median_lag_minutes": null,
+    "lag_sample_size": 0,
+    "actual_spend_usd": 0.017751,
+    "paid_runs": 13,
+    "fallback_events": 0,
+    "unreconciled_runs": 0,
+    "draft_accounts": 32,
+    "observed_window": "Source-dependent observed history; 90-day metrics include only dated records inside cutoff",
+    "weekly_budget_usd": 0.5,
+    "pending_reservation_usd": 0,
+    "reviewed_accounts": 18,
+    "automated_candidate_accounts": 14,
+    "usage_accounting_status": "reconciled",
+    "suppressed_generic_pitch_accounts": 1,
+    "accepted_llm_sequences": 1,
+    "successful_api_responses": 11,
+    "rejected_api_requests": 2
+  },
+  "provider_stats": [
+    {
+      "id": "openai",
+      "name": "OpenAI",
+      "observed_incidents": 25
+    },
+    {
+      "id": "anthropic",
+      "name": "Anthropic",
+      "observed_incidents": 25
+    },
+    {
+      "id": "google",
+      "name": "Google Gemini / Vertex AI",
+      "observed_incidents": 1
+    },
+    {
+      "id": "mistral",
+      "name": "Mistral",
+      "observed_incidents": 0
+    },
+    {
+      "id": "azure",
+      "name": "Azure OpenAI",
+      "observed_incidents": 0
+    },
+    {
+      "id": "bedrock",
+      "name": "AWS Bedrock",
+      "observed_incidents": 0
+    },
+    {
+      "id": "openrouter",
+      "name": "OpenRouter",
+      "observed_incidents": 0
+    }
+  ],
+  "methodology": "First-party public status evidence. Explicit upstream attribution, named mentions and temporal candidates are separated. No customer architecture inferred.",
+  "limitations": [
+    "Observed public history is incomplete and varies by source. A requested 180-day window is not proof of 180-day coverage.",
+    "A named provider mention is distinct from explicit upstream attribution. Temporal alignment is never confirmed causality.",
+    "Status-page incidents do not establish single-provider architecture, absence of failover, lost revenue, buying intent, or current unresolved pain.",
+    "RSS publication timestamps may reflect updates rather than onset; such records have no onset lag or duration.",
+    "Enterprise fit, current stack, build-versus-buy, and existing OpenRouter use remain unknown unless separately sourced.",
+    "Model fallbacks require tested compatibility, quality, data handling, and regional constraints; they are not universal substitutes."
+  ]
+}
