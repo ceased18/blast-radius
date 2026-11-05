@@ -50,8 +50,43 @@
     "tools": [
       "lookup_company",
       "search_companies",
-      "snapshot_status"
+      "snapshot_status",
+      "prepare_pg_plan",
+      "generate_pg_plan"
     ],
-    "hosted_endpoint": null
+    "hosted_endpoint": null,
+    "read_only_tools": [
+      "lookup_company",
+      "search_companies",
+      "snapshot_status",
+      "prepare_pg_plan"
+    ],
+    "network_tools": [
+      "generate_pg_plan"
+    ]
+  },
+  "pg_plan": {
+    "workflow_url": "https://blast-radius-plans.alluringdoor.chatgpt.site/workflows/pg-plan.md",
+    "skill_url": "https://blast-radius-plans.alluringdoor.chatgpt.site/skills/blast-pg-plan/SKILL.md",
+    "output_schema_url": "https://blast-radius-plans.alluringdoor.chatgpt.site/api/v1/schemas/pg-plan.schema.json",
+    "request_schema_url": "https://blast-radius-plans.alluringdoor.chatgpt.site/api/v1/schemas/pg-plan-request.schema.json",
+    "runtime": {
+      "method": "POST",
+      "url": "https://blast-radius-plans.alluringdoor.chatgpt.site/api/v1/pg-plan",
+      "authentication": "none",
+      "shared_demo_total_cap_usd": 0.25,
+      "availability": "Inspect actual service status and budget; contract destination is not a deployment-success claim."
+    },
+    "preparation": {
+      "cli": "python -m blast prepare-pg-plan glean.com",
+      "mcp": "prepare_pg_plan",
+      "result": "prepared_not_researched; local context and instructions only"
+    },
+    "generation": {
+      "cli": "python -m blast generate-pg-plan glean.com",
+      "mcp": "generate_pg_plan",
+      "result": "Explicit public network action; may spend server's capped OpenRouter budget; no automatic retry"
+    },
+    "own_agent_route": "Follow the workflow with a browsing-capable caller model when POST is unavailable; disclose that it is not a hosted OpenRouter run."
   }
 }

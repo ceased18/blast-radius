@@ -1,4 +1,12 @@
-Blast Radius public evidence contract v1
+Blast Radius PG research and public evidence contract v1
+
+PG RESEARCH
+Workflow: https://blast-radius-plans.alluringdoor.chatgpt.site/workflows/pg-plan.md
+Public generation: POST https://blast-radius-plans.alluringdoor.chatgpt.site/api/v1/pg-plan
+JSON body: {"account_domain":"glean.com","seller":"OpenRouter","seller_domain":"openrouter.ai"}
+No visitor key. The server uses OpenRouter under a shared $0.25 total demo cap; one account per request. Inspect actual status, plan, research sources, served models, usage and budget. Unavailable/in-progress/exhausted responses are not completed research. Never retry an uncertain sent request automatically.
+If HTTP POST is unavailable or budget is exhausted, execute the workflow with the caller's own browsing-capable agent and disclose that model route. Following Markdown does not invoke the hosted OpenRouter pipeline. Live research is mandatory for each supplied account and incomplete seller context. Preserve every user account; no selection/ranking/outreach. Output exactly three pains, three personas, verified tools or None found, one hypothesis, and an empty weekly goal.
+The local prepare_pg_plan tool supplies a briefing/instructions only. generate_pg_plan is the separate explicit public-network action.
 
 PURPOSE
 Retrieve first-party historical provider-dependency evidence and existing-fallback counterevidence for a deliberately selected company. This is a six-company snapshot, not a live monitoring service, arbitrary-company research engine, enrichment service, or list of qualified opportunities.
@@ -28,7 +36,8 @@ These JSON commands use only the checked-in public pack and the Python standard 
 OPTIONAL LOCAL MCP
 Install repository optional dependency with python -m pip install '.[mcp]'.
 Run python -m blast mcp over stdio, or the installed blast-evidence-mcp command.
-Tools: lookup_company(domain), search_companies(query, limit), snapshot_status().
+Tools: lookup_company(domain), search_companies(query, limit), snapshot_status(), prepare_pg_plan(account_domain, seller, seller_domain), generate_pg_plan(account_domain, seller, seller_domain).
+The first four are local reads and do not generate research. generate_pg_plan is annotated as a network action and may spend the service's capped OpenRouter budget. It accepts no arbitrary URL or visitor credential.
 The official Python MCP SDK implements the protocol. No hosted MCP URL exists on this static site.
 
 DATA CONTRACT

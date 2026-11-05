@@ -1,9 +1,9 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Blast Radius public evidence snapshot",
-    "version": "1.0.0",
-    "description": "Read-only static JSON for six deliberately selected companies. Not live monitoring, enrichment, a complete outage history, or qualified pipeline. No API key required. Local CLI/MCP return structured not_covered for unknown domains; a static URL outside the published index returns the host's ordinary HTTP404, not a health verdict."
+    "title": "Blast Radius PG planning and public evidence",
+    "version": "1.1.0",
+    "description": "Read-only static JSON for six deliberately selected companies. Not live monitoring, enrichment, a complete outage history, or qualified pipeline. No API key required. Local CLI/MCP return structured not_covered for unknown domains; a static URL outside the published index returns the host's ordinary HTTP404, not a health verdict. A separate public PG service performs explicit one-account research requests using its own capped OpenRouter budget. Operation-level servers point those requests to the PG runtime, not GitHub Pages. Availability is established by actual service responses."
   },
   "servers": [
     {
@@ -87,6 +87,604 @@
               "text/html": {
                 "schema": {
                   "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/pg-plan": {
+      "post": {
+        "operationId": "generatePgPlan",
+        "servers": [
+          {
+            "url": "https://blast-radius-plans.alluringdoor.chatgpt.site"
+          }
+        ],
+        "summary": "Explicit one-account PG research through the capped public OpenRouter service",
+        "description": "No visitor key. Shared $0.25 total demo cap, not a per-caller allowance. Caller supplies seller/account; the service does not select or rank accounts or write outreach. Output fixes 3 pains, 3 personas, verified tools or None found, 1 hypothesis and an empty weekly goal. Inspect actual status, provenance, usage and budget; do not automatically retry uncertain sent requests.",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "./schemas/pg-plan-request.schema.json"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Completed/cached plan, or an honest research/plan-unavailable envelope after an attempt.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "schema_version": {
+                      "const": "1.0"
+                    },
+                    "status": {
+                      "type": "string",
+                      "description": "complete/cached can include a plan; research_unavailable, budget_exhausted, in_progress and plan_unavailable are not successful research."
+                    },
+                    "plan": {
+                      "oneOf": [
+                        {
+                          "$ref": "./schemas/pg-plan.schema.json"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "request_id": {
+                      "type": "string"
+                    },
+                    "cache_key": {
+                      "type": "string"
+                    },
+                    "cached_at": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "research": {
+                      "type": "object",
+                      "description": "Sanitized retrieved-source provenance, check date, coverage gaps and web-search count. Raw source bodies are not public."
+                    },
+                    "usage": {
+                      "type": "object",
+                      "description": "Actual reported cost and request metadata, including served model, requested fallback models and generation IDs. Reservations are not actual spend."
+                    },
+                    "budget": {
+                      "type": "object",
+                      "description": "Shared lifetime demo budget: cap_microusd=250000, committed/remaining amounts and unresolved accounting state."
+                    }
+                  },
+                  "required": [
+                    "status"
+                  ]
+                }
+              }
+            }
+          },
+          "202": {
+            "description": "Same request is in progress; use the returned cache key with the safe GET poll route.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "schema_version": {
+                      "const": "1.0"
+                    },
+                    "status": {
+                      "type": "string",
+                      "description": "complete/cached can include a plan; research_unavailable, budget_exhausted, in_progress and plan_unavailable are not successful research."
+                    },
+                    "plan": {
+                      "oneOf": [
+                        {
+                          "$ref": "./schemas/pg-plan.schema.json"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "request_id": {
+                      "type": "string"
+                    },
+                    "cache_key": {
+                      "type": "string"
+                    },
+                    "cached_at": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "research": {
+                      "type": "object",
+                      "description": "Sanitized retrieved-source provenance, check date, coverage gaps and web-search count. Raw source bodies are not public."
+                    },
+                    "usage": {
+                      "type": "object",
+                      "description": "Actual reported cost and request metadata, including served model, requested fallback models and generation IDs. Reservations are not actual spend."
+                    },
+                    "budget": {
+                      "type": "object",
+                      "description": "Shared lifetime demo budget: cap_microusd=250000, committed/remaining amounts and unresolved accounting state."
+                    }
+                  },
+                  "required": [
+                    "status"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid bounded seller/account input.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "schema_version": {
+                      "const": "1.0"
+                    },
+                    "status": {
+                      "type": "string",
+                      "description": "complete/cached can include a plan; research_unavailable, budget_exhausted, in_progress and plan_unavailable are not successful research."
+                    },
+                    "plan": {
+                      "oneOf": [
+                        {
+                          "$ref": "./schemas/pg-plan.schema.json"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "request_id": {
+                      "type": "string"
+                    },
+                    "cache_key": {
+                      "type": "string"
+                    },
+                    "cached_at": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "research": {
+                      "type": "object",
+                      "description": "Sanitized retrieved-source provenance, check date, coverage gaps and web-search count. Raw source bodies are not public."
+                    },
+                    "usage": {
+                      "type": "object",
+                      "description": "Actual reported cost and request metadata, including served model, requested fallback models and generation IDs. Reservations are not actual spend."
+                    },
+                    "budget": {
+                      "type": "object",
+                      "description": "Shared lifetime demo budget: cap_microusd=250000, committed/remaining amounts and unresolved accounting state."
+                    }
+                  },
+                  "required": [
+                    "status"
+                  ]
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Insufficient shared public demo budget; no new plan is claimed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "schema_version": {
+                      "const": "1.0"
+                    },
+                    "status": {
+                      "type": "string",
+                      "description": "complete/cached can include a plan; research_unavailable, budget_exhausted, in_progress and plan_unavailable are not successful research."
+                    },
+                    "plan": {
+                      "oneOf": [
+                        {
+                          "$ref": "./schemas/pg-plan.schema.json"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "request_id": {
+                      "type": "string"
+                    },
+                    "cache_key": {
+                      "type": "string"
+                    },
+                    "cached_at": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "research": {
+                      "type": "object",
+                      "description": "Sanitized retrieved-source provenance, check date, coverage gaps and web-search count. Raw source bodies are not public."
+                    },
+                    "usage": {
+                      "type": "object",
+                      "description": "Actual reported cost and request metadata, including served model, requested fallback models and generation IDs. Reservations are not actual spend."
+                    },
+                    "budget": {
+                      "type": "object",
+                      "description": "Shared lifetime demo budget: cap_microusd=250000, committed/remaining amounts and unresolved accounting state."
+                    }
+                  },
+                  "required": [
+                    "status"
+                  ]
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Origin not permitted.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "schema_version": {
+                      "const": "1.0"
+                    },
+                    "status": {
+                      "type": "string",
+                      "description": "complete/cached can include a plan; research_unavailable, budget_exhausted, in_progress and plan_unavailable are not successful research."
+                    },
+                    "plan": {
+                      "oneOf": [
+                        {
+                          "$ref": "./schemas/pg-plan.schema.json"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "request_id": {
+                      "type": "string"
+                    },
+                    "cache_key": {
+                      "type": "string"
+                    },
+                    "cached_at": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "research": {
+                      "type": "object",
+                      "description": "Sanitized retrieved-source provenance, check date, coverage gaps and web-search count. Raw source bodies are not public."
+                    },
+                    "usage": {
+                      "type": "object",
+                      "description": "Actual reported cost and request metadata, including served model, requested fallback models and generation IDs. Reservations are not actual spend."
+                    },
+                    "budget": {
+                      "type": "object",
+                      "description": "Shared lifetime demo budget: cap_microusd=250000, committed/remaining amounts and unresolved accounting state."
+                    }
+                  },
+                  "required": [
+                    "status"
+                  ]
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Unresolved budget state or concurrent reservation; do not blindly retry a paid action.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "schema_version": {
+                      "const": "1.0"
+                    },
+                    "status": {
+                      "type": "string",
+                      "description": "complete/cached can include a plan; research_unavailable, budget_exhausted, in_progress and plan_unavailable are not successful research."
+                    },
+                    "plan": {
+                      "oneOf": [
+                        {
+                          "$ref": "./schemas/pg-plan.schema.json"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "request_id": {
+                      "type": "string"
+                    },
+                    "cache_key": {
+                      "type": "string"
+                    },
+                    "cached_at": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "research": {
+                      "type": "object",
+                      "description": "Sanitized retrieved-source provenance, check date, coverage gaps and web-search count. Raw source bodies are not public."
+                    },
+                    "usage": {
+                      "type": "object",
+                      "description": "Actual reported cost and request metadata, including served model, requested fallback models and generation IDs. Reservations are not actual spend."
+                    },
+                    "budget": {
+                      "type": "object",
+                      "description": "Shared lifetime demo budget: cap_microusd=250000, committed/remaining amounts and unresolved accounting state."
+                    }
+                  },
+                  "required": [
+                    "status"
+                  ]
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Operator-disabled service or unavailable durable budget state.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "schema_version": {
+                      "const": "1.0"
+                    },
+                    "status": {
+                      "type": "string",
+                      "description": "complete/cached can include a plan; research_unavailable, budget_exhausted, in_progress and plan_unavailable are not successful research."
+                    },
+                    "plan": {
+                      "oneOf": [
+                        {
+                          "$ref": "./schemas/pg-plan.schema.json"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "request_id": {
+                      "type": "string"
+                    },
+                    "cache_key": {
+                      "type": "string"
+                    },
+                    "cached_at": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "research": {
+                      "type": "object",
+                      "description": "Sanitized retrieved-source provenance, check date, coverage gaps and web-search count. Raw source bodies are not public."
+                    },
+                    "usage": {
+                      "type": "object",
+                      "description": "Actual reported cost and request metadata, including served model, requested fallback models and generation IDs. Reservations are not actual spend."
+                    },
+                    "budget": {
+                      "type": "object",
+                      "description": "Shared lifetime demo budget: cap_microusd=250000, committed/remaining amounts and unresolved accounting state."
+                    }
+                  },
+                  "required": [
+                    "status"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/status": {
+      "get": {
+        "operationId": "pgServiceStatus",
+        "servers": [
+          {
+            "url": "https://blast-radius-plans.alluringdoor.chatgpt.site"
+          }
+        ],
+        "summary": "Read service readiness and shared budget without a model call",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Service readiness, can_generate and current budget.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Budget database or service state unavailable.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/pg-plan/{cache_key}": {
+      "get": {
+        "operationId": "readPgPlanJob",
+        "servers": [
+          {
+            "url": "https://blast-radius-plans.alluringdoor.chatgpt.site"
+          }
+        ],
+        "summary": "Poll a known request key without creating another paid request",
+        "security": [],
+        "parameters": [
+          {
+            "name": "cache_key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Cached completed/failed request envelope.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "schema_version": {
+                      "const": "1.0"
+                    },
+                    "status": {
+                      "type": "string",
+                      "description": "complete/cached can include a plan; research_unavailable, budget_exhausted, in_progress and plan_unavailable are not successful research."
+                    },
+                    "plan": {
+                      "oneOf": [
+                        {
+                          "$ref": "./schemas/pg-plan.schema.json"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "request_id": {
+                      "type": "string"
+                    },
+                    "cache_key": {
+                      "type": "string"
+                    },
+                    "cached_at": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "research": {
+                      "type": "object",
+                      "description": "Sanitized retrieved-source provenance, check date, coverage gaps and web-search count. Raw source bodies are not public."
+                    },
+                    "usage": {
+                      "type": "object",
+                      "description": "Actual reported cost and request metadata, including served model, requested fallback models and generation IDs. Reservations are not actual spend."
+                    },
+                    "budget": {
+                      "type": "object",
+                      "description": "Shared lifetime demo budget: cap_microusd=250000, committed/remaining amounts and unresolved accounting state."
+                    }
+                  },
+                  "required": [
+                    "status"
+                  ]
+                }
+              }
+            }
+          },
+          "202": {
+            "description": "Request is still processing.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "schema_version": {
+                      "const": "1.0"
+                    },
+                    "status": {
+                      "type": "string",
+                      "description": "complete/cached can include a plan; research_unavailable, budget_exhausted, in_progress and plan_unavailable are not successful research."
+                    },
+                    "plan": {
+                      "oneOf": [
+                        {
+                          "$ref": "./schemas/pg-plan.schema.json"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "request_id": {
+                      "type": "string"
+                    },
+                    "cache_key": {
+                      "type": "string"
+                    },
+                    "cached_at": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "research": {
+                      "type": "object",
+                      "description": "Sanitized retrieved-source provenance, check date, coverage gaps and web-search count. Raw source bodies are not public."
+                    },
+                    "usage": {
+                      "type": "object",
+                      "description": "Actual reported cost and request metadata, including served model, requested fallback models and generation IDs. Reservations are not actual spend."
+                    },
+                    "budget": {
+                      "type": "object",
+                      "description": "Shared lifetime demo budget: cap_microusd=250000, committed/remaining amounts and unresolved accounting state."
+                    }
+                  },
+                  "required": [
+                    "status"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No stored request for this key.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
                 }
               }
             }

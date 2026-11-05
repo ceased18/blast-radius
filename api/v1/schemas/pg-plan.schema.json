@@ -1,0 +1,542 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://blast-radius-plans.alluringdoor.chatgpt.site/api/v1/schemas/pg-plan.schema.json",
+  "title": "Evidence-backed weekly PG account plan",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "status": {
+      "enum": [
+        "research_complete",
+        "research_incomplete"
+      ]
+    },
+    "seller": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1600
+        },
+        "domain": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1600
+        },
+        "positioning_note": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1600
+        },
+        "source_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true,
+          "maxItems": 12
+        }
+      },
+      "required": [
+        "name",
+        "domain",
+        "positioning_note",
+        "source_ids"
+      ],
+      "additionalProperties": false
+    },
+    "account": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1600
+        },
+        "domain": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1600
+        }
+      },
+      "required": [
+        "name",
+        "domain"
+      ],
+      "additionalProperties": false
+    },
+    "research_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1600
+          },
+          "url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1600
+          },
+          "publisher": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1600
+          },
+          "published_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "retrieved_at": {
+            "type": "string"
+          },
+          "quote": {
+            "type": "string",
+            "maxLength": 350
+          },
+          "origin": {
+            "enum": [
+              "live_web",
+              "snapshot"
+            ]
+          },
+          "currentness": {
+            "enum": [
+              "live_retrieved",
+              "historical_snapshot"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "url",
+          "title",
+          "publisher",
+          "published_at",
+          "retrieved_at",
+          "quote",
+          "origin",
+          "currentness"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 24
+    },
+    "pains": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1600
+          },
+          "statement": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1600
+          },
+          "evidence_status": {
+            "enum": [
+              "verified_pressure",
+              "supported_inference",
+              "insufficient_evidence"
+            ]
+          },
+          "evidence": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "claim": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 1600
+                },
+                "source_ids": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "uniqueItems": true,
+                  "maxItems": 12,
+                  "minItems": 1
+                }
+              },
+              "required": [
+                "claim",
+                "source_ids"
+              ],
+              "additionalProperties": false
+            },
+            "maxItems": 4
+          },
+          "cost_of_inaction": {
+            "type": "object",
+            "properties": {
+              "statement": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1600
+              },
+              "basis": {
+                "enum": [
+                  "verified",
+                  "supported_inference",
+                  "unknown"
+                ]
+              },
+              "source_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "uniqueItems": true,
+                "maxItems": 12
+              }
+            },
+            "required": [
+              "statement",
+              "basis",
+              "source_ids"
+            ],
+            "additionalProperties": false
+          },
+          "why_seller": {
+            "type": "object",
+            "properties": {
+              "statement": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1600
+              },
+              "source_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "uniqueItems": true,
+                "maxItems": 12
+              }
+            },
+            "required": [
+              "statement",
+              "source_ids"
+            ],
+            "additionalProperties": false
+          },
+          "confidence": {
+            "enum": [
+              "High",
+              "Medium",
+              null
+            ]
+          },
+          "missing_evidence": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1600
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "title",
+          "statement",
+          "evidence_status",
+          "evidence",
+          "cost_of_inaction",
+          "why_seller",
+          "confidence",
+          "missing_evidence"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 3,
+      "maxItems": 3
+    },
+    "personas": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1600
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1600
+          },
+          "role_in_problem": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1600
+          },
+          "messaging_angle": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1600
+          },
+          "verification": {
+            "type": "object",
+            "properties": {
+              "status": {
+                "enum": [
+                  "current_verified",
+                  "name_unknown"
+                ]
+              },
+              "source_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "uniqueItems": true,
+                "maxItems": 12
+              },
+              "checked_at": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "evidence_date": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "status",
+              "source_ids",
+              "checked_at",
+              "evidence_date"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "name",
+          "title",
+          "role_in_problem",
+          "messaging_angle",
+          "verification"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 3,
+      "maxItems": 3
+    },
+    "tools": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "verified_tools",
+            "none_found"
+          ]
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1600
+              },
+              "presence": {
+                "enum": [
+                  "in_use",
+                  "evaluation",
+                  "migration",
+                  "replacement"
+                ]
+              },
+              "presence_evidence": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1600
+              },
+              "source_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "uniqueItems": true,
+                "maxItems": 12,
+                "minItems": 1
+              },
+              "evidence_date": {
+                "type": "string"
+              },
+              "confidence": {
+                "enum": [
+                  "High",
+                  "Medium"
+                ]
+              },
+              "displacement_angle": {
+                "type": "object",
+                "properties": {
+                  "statement": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 1600
+                  },
+                  "basis": {
+                    "const": "supported_inference"
+                  },
+                  "source_ids": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "uniqueItems": true,
+                    "maxItems": 12,
+                    "minItems": 1
+                  }
+                },
+                "required": [
+                  "statement",
+                  "basis",
+                  "source_ids"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "name",
+              "presence",
+              "presence_evidence",
+              "source_ids",
+              "evidence_date",
+              "confidence",
+              "displacement_angle"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 3
+        },
+        "search_note": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1600
+        }
+      },
+      "required": [
+        "status",
+        "items",
+        "search_note"
+      ],
+      "additionalProperties": false
+    },
+    "initial_value_hypothesis": {
+      "type": "object",
+      "properties": {
+        "statement": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1600
+        },
+        "initiative_or_situation": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1600
+        },
+        "source_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true,
+          "maxItems": 12
+        },
+        "basis": {
+          "const": "hypothesis"
+        }
+      },
+      "required": [
+        "statement",
+        "initiative_or_situation",
+        "source_ids",
+        "basis"
+      ],
+      "additionalProperties": false
+    },
+    "key_goal_for_week": {
+      "const": ""
+    },
+    "limitations": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 1600
+      },
+      "minItems": 1,
+      "maxItems": 12
+    }
+  },
+  "required": [
+    "schema_version",
+    "status",
+    "seller",
+    "account",
+    "research_date",
+    "sources",
+    "pains",
+    "personas",
+    "tools",
+    "initial_value_hypothesis",
+    "key_goal_for_week",
+    "limitations"
+  ],
+  "additionalProperties": false
+}
