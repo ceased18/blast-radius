@@ -83,7 +83,7 @@ function parseContent(content){
 export function webSearchCount(usage){return Number(usage?.server_tool_use_details?.web_search_requests ?? usage?.server_tool_use_details?.web_search?.executed ?? usage?.server_tool_use?.web_search_requests ?? 0);}
 export async function callOpenRouter({db,key,stage,models,payload,fetchImpl,env}){
   const bytes=new TextEncoder().encode(JSON.stringify(payload)).byteLength;
-  if(bytes>(stage.startsWith('research')?10_000:20_000))throw new PublicError('request_exceeds_reserved_bound');
+  if(bytes>(stage.startsWith('research')?10_000:24_000))throw new PublicError('request_exceeds_reserved_bound');
   const id=crypto.randomUUID();await beginCall(db,{id,key,stage,models:models.map(m=>m.id)});
   let billed=false;
   try{

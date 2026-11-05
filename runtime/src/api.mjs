@@ -2,7 +2,7 @@ import {CAP_MICROUSD,REQUEST_RESERVE_MICROUSD,BUDGET_PROOF,primarySession,budget
 import {PublicError,boundedJson,getCatalog,selectModels,getKeyUsageNanousd,generationCost,basePayload,callOpenRouter,liveSources,belongsToDomain} from './openrouter.mjs';
 import {buildPlanPrompt,validatePgPlan} from './pg_contract.mjs';
 
-const REVISION='pg-plan-public-v1.5';
+const REVISION='pg-plan-public-v1.5.1';
 const ORIGIN='https://blast-radius-plans.alluringdoor.chatgpt.site';
 const encoder=new TextEncoder();
 const RESEARCH_SCHEMA={type:'object',properties:{company_summary:{type:'string'},research_gaps:{type:'array',items:{type:'string'}}},required:['company_summary','research_gaps'],additionalProperties:false};

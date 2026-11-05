@@ -42,18 +42,18 @@ The approved public demo cap is **250,000 micro-USD ($0.25) for its lifetime**, 
 
 A new job atomically reserves **170,000 micro-USD** using one conditional SQL insert. Only one paid job may be active. Canonical duplicate requests read the same processing or cached result, including across Worker instances. Completed jobs consume reported charges rounded up to integer micro-USD. Unknown outcomes retain their stored reservation and block new paid jobs. Earlier jobs retain the reservation recorded by their own version. A lower remaining balance can therefore prevent another run even when it is above zero; cached reads stay available.
 
-The conservative request bound is 161,020 micro-USD:
+The conservative request bound is 165,020 micro-USD:
 
 | Component | Maximum reserved behavior |
 | --- | --- |
 | Research model work | Eight attempts: two company calls times two model passes times two fallback models; each has at most 40,960 context tokens and 1,500 output tokens, including reasoning |
 | Research price ceilings | $0.25 per million input tokens and $0.50 per million output tokens |
 | Search | Four Exa searches reserved across model fallbacks at $0.007 each |
-| Planning model work | Two attempts; 24,100 input tokens including overhead allowance and 3,500 output tokens |
+| Planning model work | Two attempts; 28,100 input tokens including overhead allowance and 3,500 output tokens |
 | Planning price ceilings | $0.50 per million input tokens and $3 per million output tokens |
 | Repair | No automatic paid regeneration |
 
-Research models are selected from the current catalog only when their context and supported parameters fit the bound. Planning's complete serialized UTF-8 request is capped at 20,000 bytes, with a conservative protocol overhead allowance. Provider fallback is disabled within each selected model; the request still carries two explicit model fallbacks. Prices are bounded using request `provider.max_price`, not merely catalog floors.
+Research models are selected from the current catalog only when their context and supported parameters fit the bound. Planning's complete serialized UTF-8 request is capped at 24,000 bytes, with a conservative protocol overhead allowance. Provider fallback is disabled within each selected model; the request still carries two explicit model fallbacks. Prices are bounded using request `provider.max_price`, not merely catalog floors.
 
 OpenRouter's [usage accounting documentation](https://openrouter.ai/docs/cookbook/administration/usage-accounting) defines `usage.cost` as the total amount charged to the account. Raw usage and generation IDs are retained for billing checks. First-use validation should also compare the settled dedicated-key usage delta against recorded call costs, including search charges.
 

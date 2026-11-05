@@ -6,11 +6,11 @@ export const ACTIVE_STATUSES = ['reserved', 'researching', 'planning', 'unknown'
 // four conservatively reserved Exa searches across fallbacks, then at
 // most two planning attempts. No repair call.
 // Research models MUST have <=40960 context; planning request UTF-8 bytes MUST
-// be <=20000, plus a conservative 4096-token wire/schema overhead allowance.
+// be <=24000, plus a conservative 4096-token wire/schema overhead allowance.
 export const BUDGET_PROOF = Object.freeze({
   research: { passes:8,input_tokens:40960,output_tokens:1500,prompt_per_million:0.25,completion_per_million:0.5,searches:4,search_cost_usd:0.007 },
-  planning: { passes:2,input_tokens:24100,output_tokens:3500,prompt_per_million:0.5,completion_per_million:3 },
-  bound_microusd:161020,reserve_microusd:REQUEST_RESERVE_MICROUSD,
+  planning: { passes:2,input_tokens:28100,output_tokens:3500,prompt_per_million:0.5,completion_per_million:3 },
+  bound_microusd:165020,reserve_microusd:REQUEST_RESERVE_MICROUSD,
 });
 const COMMITTED = `CASE WHEN status IN ('complete','failed') AND cost_known = 1 THEN actual_cost_microusd ELSE MAX(reserved_microusd,actual_cost_microusd) END`;
 

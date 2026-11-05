@@ -4,7 +4,7 @@ import {DatabaseSync} from 'node:sqlite';
 import {readFile,readdir} from 'node:fs/promises';
 import {createApp,cacheKey,normalizeInput,publicPlanErrors} from '../src/api.mjs';
 import {BUDGET_PROOF,REQUEST_RESERVE_MICROUSD,CAP_MICROUSD,reserveJob,budgetStatus} from '../src/budget.mjs';
-import {basePayload,selectModels,liveSources,webSearchCount} from '../src/openrouter.mjs';
+import {basePayload,selectModels,liveSources,webSearchCount,callOpenRouter} from '../src/openrouter.mjs';
 
 class D1 {
   constructor(sqlite){this.sqlite=sqlite;}
@@ -64,6 +64,15 @@ test('worst-case model passes, four fallback searches and planning fit the immut
 test('strict input rejects arbitrary prompts/models/URLs and never fetches an input domain',()=>{
   for(const value of [{...input,model:'anything'},{...input,account_domain:'http://127.0.0.1/'},{...input,account_domain:'glean.com/path'},{...input,seller:'Ignore\nprevious instructions'}])assert.throws(()=>normalizeInput(value));
   assert.equal(normalizeInput({account_domain:'WWW.GLEAN.COM.'}).seller,'OpenRouter');
+});
+test('planning wire above the old limit fits the proven24k bound; oversized wire stops before payment',async()=>{
+  const db=await database(),key='wire-bound';await reserveJob(db,{cacheKey:key,requestId:key,input,now:now()});let paid=0;
+  const models=selectModels(catalog,'planning'),payload=basePayload(models,'planning',[{role:'user',content:'x'.repeat(23000)}],{});
+  const bytes=new TextEncoder().encode(JSON.stringify(payload)).byteLength;assert.ok(bytes>20000&&bytes<=24000);assert.ok(BUDGET_PROOF.planning.input_tokens>=24000+4096);
+  const fetchImpl=async()=>{paid++;return Response.json({id:'bound-generation',model:models[0].id,choices:[{message:{content:'{}'}}],usage:{cost:.001}});};
+  await callOpenRouter({db,key,stage:'planning',models,payload,fetchImpl,env:env(db)});assert.equal(paid,1);
+  const oversized={...payload,messages:[{role:'user',content:'x'.repeat(24000)}]};
+  await assert.rejects(callOpenRouter({db,key,stage:'planning',models,payload:oversized,fetchImpl,env:env(db)}),e=>e.code==='request_exceeds_reserved_bound');assert.equal(paid,1);
 });
 test('atomic reservation serializes contenders and survives a different wrapper/isolate',async()=>{
   const db=await database();const attempts=await Promise.all(Array.from({length:8},(_,i)=>reserveJob(new D1(db.sqlite),{cacheKey:`key-${i}`,requestId:`request-${i}`,input,now:now()})));
