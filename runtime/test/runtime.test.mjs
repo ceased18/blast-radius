@@ -5,6 +5,7 @@ import {readFile,readdir} from 'node:fs/promises';
 import {createApp,cacheKey,normalizeInput,publicPlanErrors} from '../src/api.mjs';
 import {BUDGET_PROOF,REQUEST_RESERVE_MICROUSD,CAP_MICROUSD,reserveJob,budgetStatus} from '../src/budget.mjs';
 import {basePayload,selectModels,liveSources,webSearchCount,callOpenRouter} from '../src/openrouter.mjs';
+import {conservativePlan} from '../src/quality.mjs';
 
 class D1 {
   constructor(sqlite){this.sqlite=sqlite;}
@@ -88,6 +89,7 @@ test('live research + validated plan execute once; identical versioned/unversion
   const first=await (await app.fetch(request(input,'/api/v1/pg-plan'),env(db),{})).json();
   assert.equal(first.status,'complete',JSON.stringify(first));assert.equal(first.plan.pains.length,3);assert.equal(first.plan.key_goal_for_week,'');assert.equal(mock.state.paid,3);
   assert.equal(first.usage.actual_cost_microusd,15004);assert.ok(!JSON.stringify(first).includes('DO_NOT_PUBLISH_RAW_SUFFIX'));assert.ok(!JSON.stringify(first).includes('test-server-value'));
+  const privateProof=JSON.parse(db.sqlite.prepare("SELECT metadata_json FROM pg_calls WHERE stage='planning'").get().metadata_json);assert.equal(privateProof.raw_candidate.key_goal_for_week,'');assert.ok(privateProof.source_bundle.some(s=>s.excerpt.includes('DO_NOT_PUBLISH_RAW_SUFFIX')));
   assert.deepEqual(mock.state.payloads[0].tools[0].parameters.allowed_domains,['account.example']);assert.deepEqual(mock.state.payloads[1].tools[0].parameters.allowed_domains,['openrouter.ai']);
   assert.deepEqual(first.usage.runs.map(r=>r.stage),['research_account','research_seller','planning']);
   assert.equal(mock.state.payloads[2].response_format.type,'json_object');assert.equal(JSON.parse(mock.state.payloads[2].messages[1].content).output_schema.type,'object');
@@ -195,4 +197,31 @@ test('public quality gate rejects feature-as-verified pressure, duplicate claims
   assert.deepEqual(publicPlanErrors(draft),[],'The same source URL can support distinct actual claims');
   draft.initial_value_hypothesis.statement='Integrating the seller will improve visibility.';assert.ok(publicPlanErrors(draft).some(e=>e.includes('explicitly conditional')));
   draft.initial_value_hypothesis.statement='If a gap exists, integration will ensure improvement.';assert.ok(publicPlanErrors(draft).some(e=>e.includes('promised outcome')));
+});
+function unsupportedCandidate(){
+  const draft=plan();draft.status='research_complete';
+  const claims=['Auto routing chooses models based on performance and cost for each supported workload.','Connect models, enterprise connectors, context, memory and skills via a governed enterprise layer'];
+  const sourceBundle=sources().map(s=>({...s,quote_allowed:true}));
+  sourceBundle[0].excerpt=claims[0];sourceBundle[0].quote=claims[0];
+  sourceBundle.push({...sourceBundle[0],id:'live-3',url:'https://account.example/controls',title:'Governed layer',excerpt:`${claims[1]} through the infrastructure request volume`,quote:claims[1]});
+  for(let i=0;i<3;i++)draft.pains[i]={title:`Potential tradeoff ${i+1}`,statement:i===0?'A documented routing policy may warrant a conditional fit check.':'The platform connects its models through a governed enterprise layer.',evidence_status:'supported_inference',evidence:[{claim:i===0?claims[0]:i===1?claims[1]:`${claims[1]} through the infrastructure request volume`,source_ids:[i===0?'live-1':'live-3']}],cost_of_inaction:{statement:i===0?'Administrative overhead might arise if policy changes need manual adjustment.':i===1?'Complex architectures might limit telemetry visibility.':'Tracking challenges might arise without explicit workspace budget alerts.',basis:'supported_inference',source_ids:[i===0?'live-1':'live-3']},why_seller:{statement:'Seller controls are documented; incremental fit is unverified.',source_ids:['live-2']},confidence:'Medium',missing_evidence:null};
+  draft.sources=sourceBundle.map(({excerpt,company_domain,quote_allowed,...s})=>s);
+  return {draft,sourceBundle};
+}
+test('conservative filter clears entire unsupported/prefix-repeated slots and unverified work costs without mutating raw draft',()=>{
+  const {draft,sourceBundle}=unsupportedCandidate(),raw=JSON.stringify(draft),out=conservativePlan(draft,{sources:sourceBundle});
+  assert.equal(JSON.stringify(draft),raw);assert.equal(out.plan.status,'research_incomplete');assert.deepEqual(out.plan.pains.map(p=>p.evidence_status),['supported_inference','insufficient_evidence','insufficient_evidence']);
+  assert.equal(out.plan.pains[0].cost_of_inaction.basis,'unknown');assert.equal(out.plan.key_goal_for_week,'');assert.equal(out.plan.pains.length,3);
+  for(const slot of out.plan.pains.slice(1)){assert.deepEqual(slot.evidence,[]);assert.equal(slot.confidence,null);assert.equal(slot.cost_of_inaction.basis,'unknown');assert.deepEqual(slot.cost_of_inaction.source_ids,[]);assert.ok(!JSON.stringify(slot).includes('limit telemetry'));}
+  assert.ok(out.quality_filter.redacted_slots[1].reasons.some(r=>r.includes('prefix')));assert.ok(out.plan.initial_value_hypothesis.statement.startsWith('Unverified test hypothesis: '));
+});
+test('existing cached plans are conservatively filtered and revalidated without writes, new dates or paid requests',async()=>{
+  const db=await database(),{draft}=unsupportedCandidate(),key=await cacheKey(input),created=now();await reserveJob(db,{cacheKey:key,requestId:'legacy',input,now:created});
+  const raw=JSON.stringify({status:'complete',plan:draft,generated_at:created,research:{checked_at:created},usage:{cost_known:true,actual_cost_microusd:6846,runs:[]}});
+  db.sqlite.prepare("UPDATE pg_jobs SET status='complete',cost_known=1,actual_cost_microusd=6846,response_json=? WHERE cache_key=?").run(raw,key);
+  const app=createApp({fetchImpl:async()=>{throw Error('Cached reads must not call upstream');}}),settings=env(db);
+  const out=await (await app.fetch(new Request(`https://demo.example/api/pg-plan/${key}`),settings,{})).json();
+  assert.equal(out.status,'cached',JSON.stringify(out));assert.equal(out.plan.status,'research_incomplete');assert.deepEqual(out.quality_filter.redacted_slots.map(s=>s.slot),[2,3]);assert.equal(out.plan.key_goal_for_week,'');
+  assert.equal(out.generated_at,created);assert.equal(out.research.checked_at,created);assert.equal(out.usage.actual_cost_microusd,6846);assert.equal(db.sqlite.prepare('SELECT response_json FROM pg_jobs').get().response_json,raw);assert.equal(db.sqlite.prepare('SELECT COUNT(*) n FROM pg_calls').get().n,0);
+  assert.ok(out.plan.sources.every(s=>s.retrieved_at===draft.sources.find(original=>original.id===s.id).retrieved_at));
 });

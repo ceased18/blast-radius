@@ -36,6 +36,8 @@ Planning uses JSON-object wire mode with the full PG schema once in its prompt, 
 
 This bounded public mode permits supported inferences or evidence gaps, not verified-pressure labels. Product capabilities alone do not establish adverse impact or missing controls. Backed slots cannot repeat the same normalized evidence claim set as three different pains, and the value hypothesis must state an explicit, uncertain condition rather than promise an outcome. These checks are necessary limits; a person must still review whether each inference follows from its cited facts.
 
+A conservative filter runs on new drafts and cached reads. Unsupported missing-control or availability premises, and repeated/prefix-equivalent evidence passed off as distinct pains, become entire `insufficient_evidence` slots. Unestablished manual-work costs become unknown. The response retains three slots and a blank goal, and is marked `research_incomplete` when evidence is missing. `quality_filter` explains the edits without claiming semantic verification. A retained hypothesis is explicitly an unverified test, not an integration recommendation. New raw model candidates and authenticated source bundles stay in private D1 call metadata; cached legacy responses remain unchanged in storage. Filtering does not change billing, source dates or generation dates, and never calls a model.
+
 ## Lifetime demo budget
 
 The approved public demo cap is **250,000 micro-USD ($0.25) for its lifetime**, including validation. It does not reset weekly. D1 is the authority; memory, cookies and browser storage are not budget controls.

@@ -1,6 +1,7 @@
 import {CAP_MICROUSD,REQUEST_RESERVE_MICROUSD,BUDGET_PROOF,primarySession,budgetStatus,findJob,reserveJob,setJobStage,finishJob,jobUsage} from './budget.mjs';
 import {PublicError,boundedJson,getCatalog,selectModels,getKeyUsageNanousd,generationCost,basePayload,callOpenRouter,liveSources,belongsToDomain} from './openrouter.mjs';
 import {buildPlanPrompt,validatePgPlan} from './pg_contract.mjs';
+import {conservativePlan} from './quality.mjs';
 
 const REVISION='pg-plan-public-v1.5.1';
 const ORIGIN='https://blast-radius-plans.alluringdoor.chatgpt.site';
@@ -75,9 +76,30 @@ async function bodyJson(request,max=2048){
   const all=new Uint8Array(size);let at=0;for(const c of chunks){all.set(c,at);at+=c.length;}
   try{return JSON.parse(new TextDecoder().decode(all));}catch{throw new PublicError('invalid_json');}
 }
-async function cachedResponse(db,job,{cached=true}={}){
+function cachedSources(plan,assets){
+  const snapshot=sourceSnapshot(snapshotFor(assets,plan.account?.domain)).sources;
+  return (plan.sources || []).map(s=>{
+    const approved=snapshot.find(original=>original.url===s.url);
+    if(s.origin==='snapshot')return approved?{...approved,id:s.id}:null;
+    const domain=belongsToDomain(s.url,plan.account?.domain)?plan.account.domain:belongsToDomain(s.url,plan.seller?.domain)?plan.seller.domain:null;
+    return s.origin==='live_web'&&domain?{...s,company_domain:domain,quote_allowed:Boolean(s.quote),excerpt:s.quote || ''}:null;
+  }).filter(Boolean);
+}
+async function checkedCachedPlan(db,job,envelope,assets){
+  if(!envelope.plan)return envelope;
+  const call=await db.prepare("SELECT metadata_json FROM pg_calls WHERE cache_key=? AND stage='planning' AND status='complete' ORDER BY created_at DESC LIMIT 1").bind(job.cache_key).first();
+  let stored={};try{stored=JSON.parse(call?.metadata_json || '{}');}catch{}
+  const candidate=stored.raw_candidate || envelope.plan;
+  const sources=Array.isArray(stored.source_bundle)?stored.source_bundle:cachedSources(candidate,assets);
+  const filtered=conservativePlan(candidate,{sources});
+  const validation=validatePgPlan(filtered.plan,{sources,seller:candidate.seller,account:candidate.account,researchDate:candidate.research_date});
+  validation.errors.push(...publicPlanErrors(filtered.plan));
+  if(validation.errors.length)return {...envelope,plan:null,status:'plan_unavailable',error_code:'cached_plan_validation_failed',validation_errors:validation.errors.slice(0,12),quality_filter:filtered.quality_filter};
+  return {...envelope,plan:filtered.plan,quality_filter:filtered.quality_filter};
+}
+async function cachedResponse(db,job,{cached=true,assets={}}={}){
   const budget=visibleBudget(await budgetStatus(db));
-  if(job.response_json){const old=JSON.parse(job.response_json);return {...old,status:old.plan&&cached?'cached':old.status,cached:Boolean(cached),cached_at:job.updated_at,budget};}
+  if(job.response_json){const old=await checkedCachedPlan(db,job,JSON.parse(job.response_json),assets);return {...old,status:old.plan&&cached?'cached':old.status,cached:Boolean(cached),cached_at:job.updated_at,budget};}
   return noPlan('in_progress','An identical request is already reserved or has unresolved billing. It will not be charged again.',{request_id:job.request_id,cache_key:job.cache_key,budget,needs_operator_review:job.status==='unknown'});
 }
 async function runJob({db,input,key,requestId,models,assets,env,fetchImpl,reuse=null}){
@@ -112,12 +134,14 @@ async function runJob({db,input,key,requestId,models,assets,env,fetchImpl,reuse=
     draft.messages[0].content+=' For this bounded public demo, all three persona names MUST be Unknown with name_unknown verification. No named-person verification is performed. Keep prose concise: approximately one short sentence per field. Preserve source metadata exactly, copy only used sources, and leave the weekly goal empty.';
     const planPayload=basePayload(models.planning,'planning',draft.messages,draft.schema);
     const generated=await callOpenRouter({db,key,stage:'planning',models:models.planning,payload:planPayload,fetchImpl,env});
-    const validation=validatePgPlan(generated.content,{sources,seller,account,researchDate:now.slice(0,10)});
-    validation.errors.push(...publicPlanErrors(generated.content));
-    if(generated.content?.personas?.some(p=>p.name!=='Unknown'))validation.errors.push('This demo does not verify named people; use Unknown.');
+    await db.prepare("UPDATE pg_calls SET metadata_json=json_set(COALESCE(metadata_json,'{}'),'$.raw_candidate',json(?),'$.source_bundle',json(?)) WHERE cache_key=? AND stage='planning'").bind(JSON.stringify(generated.content),JSON.stringify(sources),key).run();
+    const filtered=conservativePlan(generated.content,{sources}),plan=filtered.plan;
+    const validation=validatePgPlan(plan,{sources,seller,account,researchDate:now.slice(0,10)});
+    validation.errors.push(...publicPlanErrors(plan));
+    if(plan?.personas?.some(p=>p.name!=='Unknown'))validation.errors.push('This demo does not verify named people; use Unknown.');
     if(!validation.valid||validation.errors.length)throw new PublicError('plan_validation_failed',{detail:validation.errors.slice(0,12)});
     const envelope={schema_version:'1.0',status:'complete',cached:false,request_id:requestId,cache_key:key,generated_at:new Date().toISOString(),cached_at:null,
-      plan:generated.content,research:{sources:publicSources(sources,generated.content),checked_at:reuse?researchCheckedAt:new Date().toISOString(),...researchMeta,coverage_gaps:reuse?.coverage_gaps || researches.flatMap(r=>Array.isArray(r.content?.research_gaps)?r.content.research_gaps:[]),web_search_requests:researches.reduce((sum,r)=>sum+r.web_search_requests,0)},
+      plan,quality_filter:filtered.quality_filter,research:{sources:publicSources(sources,plan),checked_at:reuse?researchCheckedAt:new Date().toISOString(),...researchMeta,coverage_gaps:reuse?.coverage_gaps || researches.flatMap(r=>Array.isArray(r.content?.research_gaps)?r.content.research_gaps:[]),web_search_requests:researches.reduce((sum,r)=>sum+r.web_search_requests,0)},
       limitations:['One account plan from bounded public web research, not qualified pipeline.','No people enrichment, CRM, outreach or automatic weekly goal.','Cached results retain their original generation and source dates.']};
     await finishJob(db,key,envelope);
   }catch(error){
@@ -128,7 +152,7 @@ async function runJob({db,input,key,requestId,models,assets,env,fetchImpl,reuse=
         research:{sources:publicSources(sources),checked_at:reuse?researchCheckedAt:new Date().toISOString(),...researchMeta,coverage_gaps:[code],web_search_requests:researches.reduce((sum,r)=>sum+r.web_search_requests,0)}});
     await finishJob(db,key,envelope,{unknown});
   }
-  return cachedResponse(db,await findJob(db,key),{cached:false});
+  return cachedResponse(db,await findJob(db,key),{cached:false,assets});
 }
 
 async function equalToken(a,b){if(typeof a!=='string'||typeof b!=='string'||!a||!b)return false;const [x,y]=await Promise.all([crypto.subtle.digest('SHA-256',encoder.encode(a)),crypto.subtle.digest('SHA-256',encoder.encode(b))]);let diff=0;const aa=new Uint8Array(x),bb=new Uint8Array(y);for(let i=0;i<aa.length;i++)diff|=aa[i]^bb[i];return diff===0;}
@@ -223,16 +247,16 @@ export function createApp({assets={},fetchImpl=fetch}={}){
           budget:visibleBudget(budget),cache:{entries:budget.cached_entries},limits:{accounts_per_request:1,lifetime_budget_usd:0.25},checked_at:new Date().toISOString(),budget_proof:BUDGET_PROOF},200,origin);
       }
       const match=url.pathname.match(/^\/api\/pg-plan\/([a-f0-9]{64})$/);
-      if(match&&request.method==='GET'){const job=await findJob(db,match[1]);return job?json(await cachedResponse(db,job),job.response_json?200:202,origin):json(noPlan('not_found','No cached request exists for that identifier.'),404,origin);}
+      if(match&&request.method==='GET'){const job=await findJob(db,match[1]);return job?json(await cachedResponse(db,job,{assets}),job.response_json?200:202,origin):json(noPlan('not_found','No cached request exists for that identifier.'),404,origin);}
       if(url.pathname!=='/api/pg-plan'||request.method!=='POST')return json(noPlan('not_found','Unknown API route.'),404,origin);
       const input=reuse?.input || normalizeInput(await bodyJson(request)),key=await cacheKey(input),existing=await findJob(db,key);
-      if(existing)return json(await cachedResponse(db,existing),existing.response_json?200:202,origin);
+      if(existing)return json(await cachedResponse(db,existing,{assets}),existing.response_json?200:202,origin);
       if(!env.OPENROUTER_API_KEY||(!operatorGeneration&&env.LIVE_GENERATION_ENABLED!=='1'))return json(noPlan('research_unavailable','Live generation is not enabled. Existing cached results remain readable.',{budget:visibleBudget(budget)}),503,origin);
       if(budget.blocked_by_unresolved)return json(noPlan('research_unavailable','An earlier request has unresolved processing or billing. No new paid call was made.',{budget:visibleBudget(budget)}),409,origin);
       if(budget.remaining_microusd<REQUEST_RESERVE_MICROUSD)return json(noPlan('budget_exhausted','The remaining lifetime demo allowance is below the worst-case reservation for a new request. Cached plans remain free to read.',{budget:visibleBudget(budget)}),402,origin);
       const catalog=await getCatalog(fetchImpl),models={research:selectModels(catalog,'research'),planning:selectModels(catalog,'planning')};
       const requestId=crypto.randomUUID(),reserved=await reserveJob(db,{cacheKey:key,requestId,input,now:new Date().toISOString()});
-      if(!reserved){const race=await findJob(db,key);return race?json(await cachedResponse(db,race),202,origin):json(noPlan('budget_exhausted','Another request reserved the shared allowance first. No paid call was made.',{budget:visibleBudget(await budgetStatus(db))}),409,origin);}
+      if(!reserved){const race=await findJob(db,key);return race?json(await cachedResponse(db,race,{assets}),202,origin):json(noPlan('budget_exhausted','Another request reserved the shared allowance first. No paid call was made.',{budget:visibleBudget(await budgetStatus(db))}),409,origin);}
       return json(await runJob({db,input,key,requestId,models,assets,env,fetchImpl,reuse}),200,origin);
     }catch(error){return json(noPlan(error instanceof PublicError?'research_unavailable':'generation_paused','The request could not be completed safely. No speculative plan was returned.',{error_code:error.code || 'durable_storage_unavailable'}),error instanceof PublicError?400:503,origin);}
   }};
