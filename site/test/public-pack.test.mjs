@@ -26,6 +26,17 @@ test('public publication copies only the approved six records and documented ass
   });
 });
 
+test('the downloadable PG skill is an exact copy of the canonical repository skill', async () => {
+  const canonical = await readFile(new URL('../../skills/blast-pg-plan/SKILL.md', import.meta.url));
+  const pack = await inspectPublicPack(source);
+  assert.deepEqual(pack.assets.get('skills/blast-pg-plan/SKILL.md'), canonical);
+  await fixture(async (unused, directory) => {
+    const output = join(directory, 'output');
+    await copyVerifiedPublicPack(pack, output);
+    assert.deepEqual(await readFile(join(output, 'skills/blast-pg-plan/SKILL.md')), canonical);
+  });
+});
+
 test('an unindexed private payload inside api prevents publication', async () => fixture(async pack => {
   await writeFile(join(pack, 'api/v1/private.json'), JSON.stringify({ outreach: { emails: ['private draft'] } }));
   await assert.rejects(inspectPublicPack(pack), /explicit published allowlist/);

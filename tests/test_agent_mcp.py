@@ -22,10 +22,10 @@ class MCPSnapshotTests(unittest.IsolatedAsyncioTestCase):
             async with Client(params, mode='legacy') as client:
                 self.assertIsNotNone(client.protocol_version)
                 tools = await client.list_tools()
-                self.assertEqual({t.name for t in tools.tools}, {'lookup_company', 'search_companies', 'snapshot_status'})
+                self.assertEqual({t.name for t in tools.tools}, {'lookup_company', 'search_companies', 'snapshot_status', 'prepare_pg_plan', 'generate_pg_plan'})
                 for tool in tools.tools:
-                    self.assertTrue(tool.annotations.read_only_hint)
-                    self.assertFalse(tool.annotations.open_world_hint)
+                    self.assertEqual(tool.annotations.read_only_hint, tool.name != 'generate_pg_plan')
+                    self.assertEqual(tool.annotations.open_world_hint, tool.name == 'generate_pg_plan')
                 known = await client.call_tool('lookup_company', {'domain': 'glean.com'})
                 self.assertFalse(known.is_error)
                 self.assertEqual(known.structured_content['domain'], 'glean.com')
@@ -36,6 +36,9 @@ class MCPSnapshotTests(unittest.IsolatedAsyncioTestCase):
                 status = await client.call_tool('snapshot_status', {})
                 self.assertEqual(status.structured_content['account_count'], 6)
                 self.assertFalse(status.structured_content['credentials_required'])
+                prepared = await client.call_tool('prepare_pg_plan', {'account_domain': 'glean.com'})
+                self.assertEqual(prepared.structured_content['status'], 'prepared_not_researched')
+                self.assertFalse(prepared.structured_content['network_request_performed'])
 
     def test_published_json_schema_validates_every_account(self):
         import jsonschema

@@ -21,3 +21,14 @@ private/
 
 research/EVIDENCE_REVIEW.md
 GLENN_REPORT.md
+
+runtime/node_modules/
+runtime/dist/
+runtime/src/generated_assets.mjs
+runtime/.wrangler/
+runtime/.env
+
+# Publish only the runtime's aggregate data file, never other data payloads.
+!runtime/public/data/
+runtime/public/data/*
+!runtime/public/data/public.json

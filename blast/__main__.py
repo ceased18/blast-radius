@@ -3,6 +3,9 @@ import asyncio
 import sys
 
 def main():
+    if len(sys.argv)>1 and sys.argv[1] in {"prepare-pg-plan","generate-pg-plan"}:
+        from .pg_plan import main as pg_main
+        raise SystemExit(pg_main(sys.argv[1:]))
     # Dispatch the headless surface before importing collector dependencies. It
     # works with the Python standard library alone and never reads .env.
     if len(sys.argv)>1 and sys.argv[1] in {"lookup","search","status"}:

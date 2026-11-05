@@ -1,0 +1,20 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1793915008664,
+      "tag": "0000_peaceful_norrin_radd",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1793915155637,
+      "tag": "0001_magenta_prima",
+      "breakpoints": true
+    }
+  ]
+}

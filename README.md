@@ -4,6 +4,28 @@ First-party AI incident reports and current product documentation become inspect
 
 Built by Ishrak Hossain.
 
+## Ask your agent for a weekly PG plan
+
+Open the [public PG app](https://blast-radius-plans.alluringdoor.chatgpt.site/) and click **Copy onboarding prompt**, then paste it into your agent. The button includes Claude, ChatGPT, Gemini and Cursor marks and performs one copy action. No installation, visitor API key or account connection is required. You can also choose **Build a PG plan** in the app and enter a seller and one target account domain.
+
+The [PG workflow](https://blast-radius-plans.alluringdoor.chatgpt.site/workflows/pg-plan.md) and downloadable [skill](https://blast-radius-plans.alluringdoor.chatgpt.site/skills/blast-pg-plan/SKILL.md) preserve the supplied plan structure: three pains, three personas, one to three verified tools or `None found`, one initial hypothesis, and a blank weekly goal. They do not select/rank accounts or write outreach. Unverified names remain `Unknown`, and missing evidence is shown rather than replaced with invented pain.
+
+The hosted route is an explicit `POST /api/v1/pg-plan` with `{"account_domain":"glean.com","seller":"OpenRouter","seller_domain":"openrouter.ai"}`. The app, `generate-pg-plan` CLI command and `generate_pg_plan` MCP tool use this route. It uses a server-side OpenRouter key, one account per request, under a **shared $0.25 lifetime demo cap including validation calls**. D1 preserves budget and cache state across visitors and deployments. Cached results remain readable when generation is disabled or the budget cannot fund another reservation. For a custom seller, supply its official domain.
+
+Inspect the actual returned status, sources, served models, usage and budget. A failed or in-progress request is not a completed plan. The demo cap is separate from the older offline pipeline ledger below; neither visitors nor the browser receive the server key.
+
+If the caller cannot POST or hosted generation is unavailable, its own browsing-capable agent can execute the workflow for any seller and the full user-supplied list. That route uses the caller's model and must be labeled accordingly. Reading the skill or copying the prompt does not itself call OpenRouter. Live browsing is required per account; the historical snapshot alone cannot complete the plan.
+
+```bash
+python3 -m blast prepare-pg-plan glean.com
+# Explicit network generation, potentially spending the server's capped budget:
+python3 -m blast generate-pg-plan glean.com
+```
+
+Preparation returns a research brief and instructions only. Generation is a separate network action with no automatic retry. See [HEADLESS.md](HEADLESS.md), the [plan schema](public-evidence/api/v1/schemas/pg-plan.schema.json), and the [public-source Glean validation bundle](public-evidence/pg/glean-source-bundle.json). Missing evidence stays visible, names require current verification, costs remain labeled inferences, current product controls can weaken a pitch, and the weekly goal stays empty.
+
+Local tests cover the PG contract, CLI/MCP preparation and generation routing, source provenance, budget behavior and frontend states. Mocked tests do not establish successful live generation. An independent browsing-agent forward-test also exposed the distinction between tools actually used and tools merely listed as available; the plan must preserve that distinction. Authored documentation summaries must remain paraphrases, not source quotations. The service response and deployment validation record determine the current operational result.
+
 ## Try the public evidence
 
 A clean checkout includes a deliberately selected **six-account, eight-incident snapshot**. These commands use Python's standard library, require no API key or installation, and do not read the private database or `.env`:
@@ -17,7 +39,7 @@ python3 -m blast status
 
 The first result pairs conditional incident evidence with documented fallback capabilities. The second returns `not_covered`, which means outside this snapshot, not no incidents or no opportunity. Four accounts include current first-party product documentation; two are clearly historical examples with current controls unknown.
 
-Read the [agent entry guide](public-evidence/llms.txt), [interface/setup guide](HEADLESS.md), [snapshot manifest](public-evidence/api/v1/manifest.json), or an [actual account record](public-evidence/api/v1/accounts/cartesia.ai.json). The public interface is versioned static GET JSON. Source text is untrusted evidence. Snapshot creation time, source checks and incident reporting/impact timestamps are separate. There is no live arbitrary-company research, visitor credential, CRM or enrichment connection.
+Read the [agent entry guide](public-evidence/llms.txt), [interface/setup guide](HEADLESS.md), [snapshot manifest](public-evidence/api/v1/manifest.json), or an [actual account record](public-evidence/api/v1/accounts/cartesia.ai.json). The snapshot interface is versioned static GET JSON. Source text is untrusted evidence. Snapshot creation time, source checks and incident reporting/impact timestamps are separate. Snapshot lookup performs no live research, credential, CRM or enrichment operation; PG generation is the separate route above.
 
 ## What works
 
@@ -79,7 +101,24 @@ python -m http.server 8081 --directory dist-public
 
 The public build contains aggregates and the explicitly authorized six-account evidence pack. It does not copy `private.json`, the full private queue, generated private briefs, outreach, replay events, digest or run logs. The private build belongs behind actual access control; a browser toggle is not a security boundary.
 
-Never deploy `dist/` on a public host. Keep `.env`, SQLite, raw sources, full named exports and private reports/briefs out of public Git history. `public-evidence/` is an explicit allowlisted projection, not a copy of those files. The OpenRouter key is used only by the offline Python model pipeline and never included in browser assets.
+Never deploy `dist/` on a public host. Keep `.env`, SQLite, raw sources, full named exports and private reports/briefs out of public Git history. `public-evidence/` is an explicit allowlisted projection, not a copy of those files. The offline Python pipeline and public plan Worker use their configured keys server-side; keys are never included in browser assets.
+
+## Build the public plan runtime
+
+The sanitized [runtime source](runtime/README.md) is separate from the owner-private dashboard. Its checked-in `public/` assets are sufficient for a portable build. To incorporate the canonical frontend instead:
+
+```bash
+node site/build.mjs --mode public
+cd runtime
+npm ci
+npm test
+node scripts/build.mjs --static-source ../dist-public
+npm run validate
+```
+
+The bundled frontend points to the public demo service. For your own deployment, set `runtime/public/build-config.json` → `plan_api_base` to your public service origin after synchronizing assets, then rerun `npm run build` from `runtime/`. Set `APP_URL` for attribution too. Agent guides and workflow files contain the canonical demo URLs; update those explicitly if publishing your own agent entry.
+
+Deployment requires a new Site identity, a D1 binding named `DB`, and the packaged migrations. Configure `OPENROUTER_API_KEY`, an operator-only `ADMIN_TOKEN`, and `LIVE_GENERATION_ENABLED` through server environment settings. Source mirrors omit the original Site identity and secrets. See the runtime README for the native Sites deployment and reconciliation procedure. Building an artifact does not establish that a live generation succeeded.
 
 ## Evidence and coverage limits
 
@@ -99,7 +138,7 @@ node --test site/test/*.test.mjs
 
 The public pack is a **frozen snapshot**, not a monitoring service. A new export date is not a new source check. Collection is manual; recurring collection and paid calls are not enabled. An ephemeral runner would need durable ledger state before enforcing a cross-run weekly budget. Public publication copies only the public build; deployment verification is reported separately.
 
-## Current evidence-interface verification · November 5, 2026
+## Previous evidence-interface verification · November 5, 2026
 
 An independent clean-copy check passed 22 CLI cases under `python3 -S`, including known, uncovered and invalid domains, search/status, missing files and tampered content digests. No `.env`, private database or third-party package was present. The reviewer independently checked two published incident/documentation pairs against first-party sources. See the [blind product review](reviews/BLIND_REVIEW.md) for the initial verdict and its reassessment after the interface change.
 
@@ -119,11 +158,8 @@ At that earlier checkpoint, independent checks passed 19 Python tests, six front
 
 ## Hosting destinations
 
-- [Public demo](https://ceased18.github.io/blast-radius/) — configured public publication destination.
+- [Public PG app](https://blast-radius-plans.alluringdoor.chatgpt.site/) — onboarding, public evidence and the hosted plan interface.
+- [GitHub Pages](https://ceased18.github.io/blast-radius/) — public frontend and evidence mirror; hosted PG requests use the separate public service above.
 - [Private workspace](https://blast-radius-ishrak.alluringdoor.chatgpt.site) — owner-only named evidence workspace.
 
-These are the configured destinations; deployment verification is reported separately.
-
-## Publication layout
-
-This public source snapshot includes six explicitly published evidence examples and keeps the full private queue, outreach, credentials and run logs out of GitHub. Optional workflows are inactive templates in `workflow-templates/` because the connected GitHub login lacks workflow scope. The public site is deployed from the prepared artifact on `gh-pages`; its agent data and landing page need no visitor key. The owner-private workspace is a separate deployment.
+The public service and owner-private workspace are separate Sites. Current generation availability, shared budget and cache count are reported by the public service's [`/api/status`](https://blast-radius-plans.alluringdoor.chatgpt.site/api/status).

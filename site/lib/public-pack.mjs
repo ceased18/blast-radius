@@ -1,19 +1,22 @@
 import { lstat, readdir, readFile, mkdir, writeFile } from 'node:fs/promises';
 import { resolve, join, dirname } from 'node:path';
 import { createHash } from 'node:crypto';
+import { fileURLToPath } from 'node:url';
 
 export const approvedDomains = Object.freeze(['cartesia.ai', 'github.com', 'glean.com', 'gorgias.com', 'hubspot.com', 'omni.co']);
 const scope = 'bounded_public_evidence_snapshot';
 const privateFields = new Set(['outreach', 'emails', 'email', 'brief', 'ae_brief', 'personas', 'runs', 'raw', 'payload', 'phone', 'phones', 'phone_number', 'api_key', 'authorization', 'linkedin_note', 'call_opener']);
 const accountFields = ['schema_version', 'snapshot_id', 'record_status', 'scope', 'domain', 'name', 'status_url', 'source_text_policy', 'coverage', 'evidence', 'qualification', 'what_it_proves', 'what_it_does_not_prove', 'open_questions'].sort();
-const expectedAPIPaths = ['api/v1/manifest.json', 'api/v1/accounts/index.json', 'api/v1/openapi.json', 'api/v1/schemas/account.schema.json', 'api/v1/schemas/index.schema.json', 'api/v1/schemas/not-covered.schema.json', ...approvedDomains.map(domain => `api/v1/accounts/${domain}.json`)];
+const expectedAPIPaths = ['api/v1/manifest.json', 'api/v1/accounts/index.json', 'api/v1/openapi.json', 'api/v1/schemas/account.schema.json', 'api/v1/schemas/index.schema.json', 'api/v1/schemas/not-covered.schema.json', 'api/v1/schemas/pg-plan.schema.json', 'api/v1/schemas/pg-plan-request.schema.json', ...approvedDomains.map(domain => `api/v1/accounts/${domain}.json`)];
+const repositoryRoot = fileURLToPath(new URL('../../', import.meta.url));
+const canonicalSkillAsset = 'skills/blast-pg-plan/SKILL.md';
 
-function assertPublic(value) {
+function assertPublic(value, forbidPrivateFields = true) {
   if (typeof value === 'string' && /sk-or-[A-Za-z0-9_-]{8,}|Bearer\s+[A-Za-z0-9._-]{12,}/i.test(value)) throw new Error('Credential-like content in public pack');
-  if (Array.isArray(value)) return value.forEach(assertPublic);
+  if (Array.isArray(value)) return value.forEach(child => assertPublic(child, forbidPrivateFields));
   if (value && typeof value === 'object') for (const [key, child] of Object.entries(value)) {
-    if (privateFields.has(key)) throw new Error(`Private field in public pack: ${key}`);
-    assertPublic(child);
+    if (forbidPrivateFields && privateFields.has(key)) throw new Error(`Private field in public pack: ${key}`);
+    assertPublic(child, forbidPrivateFields);
   }
 }
 
@@ -34,14 +37,26 @@ export async function inspectPublicPack(directory) {
   const actual = (await walk(root, 'api')).sort();
   if (JSON.stringify(actual) !== JSON.stringify([...expectedAPIPaths].sort())) throw new Error('Public API files differ from the explicit published allowlist');
   const assets = new Map();
-  for (const relative of [...expectedAPIPaths, 'llms.txt', 'agents.txt']) {
+  const workflowDirectory = await lstat(join(root, 'workflows'));
+  if (!workflowDirectory.isDirectory() || workflowDirectory.isSymbolicLink()) throw new Error('Workflow directory must be local to the public pack');
+  for (const relative of [...expectedAPIPaths, 'llms.txt', 'agents.txt', 'workflows/pg-plan.md']) {
     const path = join(root, relative);
     const stat = await lstat(path);
     if (!stat.isFile() || stat.isSymbolicLink() || stat.size > 256_000) throw new Error(`Invalid public pack asset: ${relative}`);
     const bytes = await readFile(path);
-    assertPublic(relative.endsWith('.json') ? JSON.parse(bytes.toString('utf8')) : bytes.toString('utf8'));
+    assertPublic(relative.endsWith('.json') ? JSON.parse(bytes.toString('utf8')) : bytes.toString('utf8'), !relative.startsWith('api/v1/schemas/') && relative !== 'api/v1/openapi.json');
     assets.set(relative, bytes);
   }
+  for (const relative of ['skills', 'skills/blast-pg-plan']) {
+    const stat = await lstat(join(repositoryRoot, relative));
+    if (!stat.isDirectory() || stat.isSymbolicLink()) throw new Error(`Canonical skill directory must be local to the repository: ${relative}`);
+  }
+  const skillPath = join(repositoryRoot, canonicalSkillAsset);
+  const skillStat = await lstat(skillPath);
+  if (!skillStat.isFile() || skillStat.isSymbolicLink() || skillStat.size > 256_000) throw new Error('Canonical PG skill must be a regular repository file');
+  const skillBytes = await readFile(skillPath);
+  assertPublic(skillBytes.toString('utf8'));
+  assets.set(canonicalSkillAsset, skillBytes);
   const manifest = JSON.parse(assets.get('api/v1/manifest.json'));
   const index = JSON.parse(assets.get('api/v1/accounts/index.json'));
   if (manifest.scope !== scope || index.scope !== scope || manifest.schema_version !== '1.0' || index.schema_version !== '1.0' || index.snapshot_id !== manifest.snapshot_id) throw new Error('Invalid or mismatched public snapshot identity');

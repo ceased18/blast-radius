@@ -1,0 +1,309 @@
+{
+  "schema_version": "1.0",
+  "status": "research_complete",
+  "seller": {
+    "name": "OpenRouter",
+    "domain": "openrouter.ai",
+    "positioning_note": "Positioning inferred from current official routing and fallback documentation; deployment fit and differentiation against existing Glean controls remain unverified.",
+    "source_ids": [
+      "OR1",
+      "OR2"
+    ]
+  },
+  "account": {
+    "name": "Glean",
+    "domain": "glean.com"
+  },
+  "research_date": "2026-11-05",
+  "sources": [
+    {
+      "id": "OR1",
+      "url": "https://openrouter.ai/docs/guides/routing/provider-selection",
+      "title": "Provider Routing",
+      "publisher": "OpenRouter",
+      "published_at": null,
+      "retrieved_at": "2026-11-05T21:43:27Z",
+      "quote": "OpenRouter routes requests to the best available providers for your model.",
+      "origin": "live_web",
+      "currentness": "live_retrieved"
+    },
+    {
+      "id": "OR2",
+      "url": "https://openrouter.ai/docs/guides/routing/model-fallbacks",
+      "title": "Model Fallbacks",
+      "publisher": "OpenRouter",
+      "published_at": null,
+      "retrieved_at": "2026-11-05T21:43:27Z",
+      "quote": "Provide an array of model IDs in priority order.",
+      "origin": "live_web",
+      "currentness": "live_retrieved"
+    },
+    {
+      "id": "G1",
+      "url": "https://docs.glean.com/get-started/golive/model-choice",
+      "title": "Model choice",
+      "publisher": "Glean",
+      "published_at": null,
+      "retrieved_at": "2026-11-05T21:43:27Z",
+      "quote": "Model upgrades and provider failover remain your team's responsibility.",
+      "origin": "live_web",
+      "currentness": "live_retrieved"
+    },
+    {
+      "id": "G2",
+      "url": "https://www.glean.com/ai-agents/agent-builder",
+      "title": "AI Agent Builder",
+      "publisher": "Glean",
+      "published_at": null,
+      "retrieved_at": "2026-11-05T21:43:27Z",
+      "quote": "Pick the right model for each step of the process.",
+      "origin": "live_web",
+      "currentness": "live_retrieved"
+    },
+    {
+      "id": "G3",
+      "url": "https://www.glean.com/platform/cost-controls",
+      "title": "AI usage controls and cost governance",
+      "publisher": "Glean",
+      "published_at": null,
+      "retrieved_at": "2026-11-05T21:43:27Z",
+      "quote": "Set monthly limits and decide what happens when usage reaches them",
+      "origin": "live_web",
+      "currentness": "live_retrieved"
+    },
+    {
+      "id": "G4",
+      "url": "https://www.glean.com/platform/ai-gateway",
+      "title": "Glean AI Gateway",
+      "publisher": "Glean",
+      "published_at": null,
+      "retrieved_at": "2026-11-05T21:43:27Z",
+      "quote": "One control plane for models and MCP",
+      "origin": "live_web",
+      "currentness": "live_retrieved"
+    },
+    {
+      "id": "G5",
+      "url": "https://www.glean.com/about",
+      "title": "About Glean \u2014 Founding Team",
+      "publisher": "Glean",
+      "published_at": null,
+      "retrieved_at": "2026-11-05T21:43:27Z",
+      "quote": "",
+      "origin": "live_web",
+      "currentness": "live_retrieved"
+    },
+    {
+      "id": "G6",
+      "url": "https://status.glean.com/incidents/36c4d510-2140-47f6-868e-efd9738d12f7",
+      "title": "Service degradation from Azure OpenAI causing failed assistant errors",
+      "publisher": "Glean Status",
+      "published_at": "2026-08-31T09:52:17Z",
+      "retrieved_at": "2026-11-05T21:43:27Z",
+      "quote": "BYOK customers using Azure OpenAI may experience failed assistant responses.",
+      "origin": "live_web",
+      "currentness": "live_retrieved"
+    }
+  ],
+  "pains": [
+    {
+      "title": "Model suitability across multi-step agents",
+      "statement": "Potential pressure: selecting suitable models for different Agent Builder steps while preserving useful behavior across a branching workflow.",
+      "evidence_status": "supported_inference",
+      "evidence": [
+        {
+          "claim": "Glean Agent Builder documents branching, looping and model selection per step.",
+          "source_ids": [
+            "G2"
+          ]
+        },
+        {
+          "claim": "Glean already offers managed model selection and its own governed AI Gateway; this is existing-control counterevidence.",
+          "source_ids": [
+            "G1",
+            "G4"
+          ]
+        }
+      ],
+      "cost_of_inaction": {
+        "statement": "Supported inference: an unsuitable model choice could require additional validation and rework or reduce the usefulness of an agent step. No observed unresolved compatibility defect or financial loss was established.",
+        "basis": "supported_inference",
+        "source_ids": [
+          "G2",
+          "G1",
+          "G4"
+        ]
+      },
+      "why_seller": {
+        "statement": "OpenRouter exposes multiple models and parameter-aware provider routing, which could be evaluated for a specific uncovered workload. It does not supply Glean-specific evaluations or prove a replacement is needed.",
+        "source_ids": [
+          "OR1",
+          "G1",
+          "G4"
+        ]
+      },
+      "confidence": "Medium",
+      "missing_evidence": null
+    },
+    {
+      "title": "Cost and quality allocation across growing agent use",
+      "statement": "Potential pressure: aligning model cost and quality with department and agent usage, while respecting existing access and usage limits.",
+      "evidence_status": "supported_inference",
+      "evidence": [
+        {
+          "claim": "Glean markets visibility and monthly limits across departments, users, models and agents.",
+          "source_ids": [
+            "G3"
+          ]
+        },
+        {
+          "claim": "Glean Universal Model Key Auto already balances quality and cost using evaluations and live usage.",
+          "source_ids": [
+            "G1"
+          ]
+        }
+      ],
+      "cost_of_inaction": {
+        "statement": "Supported inference: poorly matched model choices or limits could make capacity allocation harder or constrain useful agent work. No overrun, budget amount or quantified savings was established.",
+        "basis": "supported_inference",
+        "source_ids": [
+          "G3",
+          "G1"
+        ]
+      },
+      "why_seller": {
+        "statement": "OpenRouter documents price-aware provider selection and maximum-price constraints. Relevance depends on a gap Glean\u2019s current routing and usage controls leave; generic missing-cost-control positioning is unsupported.",
+        "source_ids": [
+          "OR1",
+          "G3",
+          "G1"
+        ]
+      },
+      "confidence": "Medium",
+      "missing_evidence": null
+    },
+    {
+      "title": "Different operational responsibility in customer-key deployments",
+      "statement": "Potential pressure: supporting a deployment model in which customer teams retain model-upgrade and provider-failover responsibility.",
+      "evidence_status": "supported_inference",
+      "evidence": [
+        {
+          "claim": "Glean distinguishes Customer Key Auto from managed selection and assigns model upgrades/provider failover to the customer team.",
+          "source_ids": [
+            "G1"
+          ]
+        },
+        {
+          "claim": "The resolved August Azure OpenAI incident explicitly affected BYOK customers and documented a change of default model as a workaround.",
+          "source_ids": [
+            "G6"
+          ]
+        }
+      ],
+      "cost_of_inaction": {
+        "statement": "Supported inference: affected customer teams may need to coordinate compatible alternatives and operational ownership during a provider problem. The incident is resolved; present gaps and applicability to any specific customer are unknown.",
+        "basis": "supported_inference",
+        "source_ids": [
+          "G1",
+          "G6"
+        ]
+      },
+      "why_seller": {
+        "statement": "Configured OpenRouter model fallbacks could be evaluated for an eligible deployment if output quality, data policy and regional requirements permit. Existing mitigation and managed-key capabilities prevent an account-wide missing-failover claim.",
+        "source_ids": [
+          "OR2",
+          "OR1",
+          "G1",
+          "G6"
+        ]
+      },
+      "confidence": "Medium",
+      "missing_evidence": null
+    }
+  ],
+  "personas": [
+    {
+      "name": "Arvind Jain",
+      "title": "Founder & CEO",
+      "role_in_problem": "Role hypothesis: executive sponsor for enterprise AI product outcomes and strategic infrastructure partnerships; purchasing authority for this use case is unverified.",
+      "messaging_angle": "Internal planning angle: whether a specific model-access or deployment gap remains despite Glean\u2019s own gateway and managed controls.",
+      "verification": {
+        "status": "current_verified",
+        "source_ids": [
+          "G5"
+        ],
+        "checked_at": "2026-11-05T21:43:27Z",
+        "evidence_date": "2026-11-05"
+      }
+    },
+    {
+      "name": "Vishwanath T R",
+      "title": "Co-founder and CTO",
+      "role_in_problem": "Role hypothesis: technical decision-maker for platform and infrastructure tradeoffs; direct ownership of the proposed evaluation is not established.",
+      "messaging_angle": "Internal planning angle: model compatibility, deployment boundaries and recovery ownership rather than an assumed absence of routing.",
+      "verification": {
+        "status": "current_verified",
+        "source_ids": [
+          "G5"
+        ],
+        "checked_at": "2026-11-05T21:43:27Z",
+        "evidence_date": "2026-11-05"
+      }
+    },
+    {
+      "name": "Unknown",
+      "title": "Head of AI Model Platform / Inference Engineering",
+      "role_in_problem": "Role hypothesis: operational owner or evaluator for model behavior, routing and rollout; current person and exact team title were not verified.",
+      "messaging_angle": "Internal planning angle: test one deployment-specific failure mode or model-compatibility requirement against existing controls.",
+      "verification": {
+        "status": "name_unknown",
+        "source_ids": [],
+        "checked_at": null,
+        "evidence_date": null
+      }
+    }
+  ],
+  "tools": {
+    "status": "verified_tools",
+    "items": [
+      {
+        "name": "Azure OpenAI",
+        "presence": "in_use",
+        "presence_evidence": "A resolved August 31 first-party incident explicitly described BYOK customers using Azure OpenAI. This proves recent historical integration/use, not current configuration or an unresolved problem.",
+        "source_ids": [
+          "G6"
+        ],
+        "evidence_date": "2026-08-31",
+        "confidence": "High",
+        "displacement_angle": {
+          "statement": "Supported inference: evaluate a compatible alternative only for an established unmet deployment requirement. Historical integration alone does not justify displacement, and the source documents an existing workaround.",
+          "basis": "supported_inference",
+          "source_ids": [
+            "G6",
+            "OR2"
+          ]
+        }
+      }
+    ],
+    "search_note": "Only one tool met this pass\u2019s concrete recent-use threshold. Other documented model choices are not treated as internal production usage."
+  },
+  "initial_value_hypothesis": {
+    "statement": "Because Glean Agent Builder supports model choices across multi-step workflows and Customer Key deployments leave failover responsibility with customer teams, a specific eligible deployment may still have a compatibility or operating-boundary question worth testing. OpenRouter\u2019s configurable model/provider routing could help test that question against an observable outcome such as successful compatible requests within the required latency and data-policy limits, but Glean\u2019s existing AI Gateway and managed controls make generic replacement claims unsupported.",
+    "initiative_or_situation": "Glean Agent Builder expansion and the documented Universal Model Key versus Customer Key operating boundary",
+    "source_ids": [
+      "G2",
+      "G1",
+      "G4",
+      "OR1",
+      "OR2"
+    ],
+    "basis": "hypothesis"
+  },
+  "key_goal_for_week": "",
+  "limitations": [
+    "Reference fixture authored by the browsing assistant from the listed public sources; it is not a hosted API or OpenRouter-generated result.",
+    "Current official capabilities do not prove historical customer configuration, present unmet need, purchase intent, budget or an active evaluation.",
+    "Undated leadership/product pages were checked live; publication dates are unknown. Role ownership beyond exact public titles is hypothetical.",
+    "Three pressures are supported analytical tradeoffs, not verified unresolved complaints; no quantified financial impact is claimed."
+  ]
+}

@@ -27,6 +27,6 @@ await cp(join(here, 'src'), join(output, 'src'), { recursive: true });
 await cp(join(dataRoot, 'public.json'), join(output, 'data', 'public.json'));
 if (mode === 'private') await cp(join(dataRoot, 'private.json'), join(output, 'data', 'private.json'));
 await copyVerifiedPublicPack(publicPack, output);
-await writeFile(join(output, 'build-config.json'), JSON.stringify({ mode, public_agent_base: 'https://ceased18.github.io/blast-radius/', repository_url: 'https://github.com/ceased18/blast-radius' }) + '\n');
+await writeFile(join(output, 'build-config.json'), JSON.stringify({ mode, public_agent_base: 'https://ceased18.github.io/blast-radius/', plan_api_base: 'https://blast-radius-plans.alluringdoor.chatgpt.site', repository_url: 'https://github.com/ceased18/blast-radius' }) + '\n');
 await writeFile(join(output, '.nojekyll'), '');
 console.log(JSON.stringify({ mode, output, full_private_payload: mode === 'private', public_named_examples: publicPack.accountCount }));

@@ -1,0 +1,176 @@
+{
+  "schema_version": "1.0",
+  "purpose": "Public-source validation fixture from fresh read-only primary research; not a generated PG plan or proof of buying intent.",
+  "seller": {
+    "name": "OpenRouter",
+    "domain": "openrouter.ai"
+  },
+  "account": {
+    "name": "Glean",
+    "domain": "glean.com"
+  },
+  "research_date": "2026-11-05",
+  "checked_at": "2026-11-05T21:43:27Z",
+  "sources": [
+    {
+      "id": "OR1",
+      "url": "https://openrouter.ai/docs/guides/routing/provider-selection",
+      "title": "Provider Routing",
+      "publisher": "OpenRouter",
+      "published_at": null,
+      "retrieved_at": "2026-11-05T21:43:27Z",
+      "company_domain": "openrouter.ai",
+      "kind": "primary_documentation",
+      "origin": "live_web",
+      "currentness": "live_retrieved",
+      "excerpt": "OpenRouter documents configurable provider routing based on price, throughput, latency and reliability. The provider object supports backup-provider permission, parameter requirements, data-collection preferences, zero-data-retention restrictions, allow/ignore lists, price sorting and maximum prices. US and EU in-region processing requires the corresponding regional endpoint and eligible plan. These are seller capabilities, not evidence that Glean uses OpenRouter or needs to replace its own controls.",
+      "quote": "OpenRouter routes requests to the best available providers for your model.",
+      "quote_allowed": true,
+      "excerpt_kind": "authored_paraphrase; only the authenticated quote field is quoteable"
+    },
+    {
+      "id": "OR2",
+      "url": "https://openrouter.ai/docs/guides/routing/model-fallbacks",
+      "title": "Model Fallbacks",
+      "publisher": "OpenRouter",
+      "published_at": null,
+      "retrieved_at": "2026-11-05T21:43:27Z",
+      "company_domain": "openrouter.ai",
+      "kind": "primary_documentation",
+      "origin": "live_web",
+      "currentness": "live_retrieved",
+      "excerpt": "OpenRouter documents an ordered models array. An error from the first requested model can cause a request to try the next model. Documented failure cases include unavailable providers, rate limiting and refusals. This does not establish that different models meet the same output-quality, tool-use, latency, data-handling or regional requirements. It does not prove any historical Glean incident would have been prevented.",
+      "quote": "Provide an array of model IDs in priority order.",
+      "quote_allowed": true,
+      "excerpt_kind": "authored_paraphrase; only the authenticated quote field is quoteable"
+    },
+    {
+      "id": "G1",
+      "url": "https://docs.glean.com/get-started/golive/model-choice",
+      "title": "Model choice",
+      "publisher": "Glean",
+      "published_at": null,
+      "retrieved_at": "2026-11-05T21:43:27Z",
+      "company_domain": "glean.com",
+      "kind": "primary_documentation",
+      "origin": "live_web",
+      "currentness": "live_retrieved",
+      "excerpt": "Glean documents Model Hub and model choice for Assistant and Builder Assistant. Universal Model Key Auto selects models using evaluations and live usage, monitoring quality, latency, cost and reliability. Customer Key (BYOK) Auto instead uses an administrator-configured default; model upgrades and provider failover remain the customer's responsibility. Builder Assistant's chosen model is separate from models configured for an agent or individual steps. This is strong existing-control counterevidence. It does not prove the key type, current architecture or unmet requirement of any customer.",
+      "quote": "Model upgrades and provider failover remain your team's responsibility.",
+      "quote_allowed": true,
+      "excerpt_kind": "authored_paraphrase; only the authenticated quote field is quoteable"
+    },
+    {
+      "id": "G2",
+      "url": "https://www.glean.com/ai-agents/agent-builder",
+      "title": "AI Agent Builder",
+      "publisher": "Glean",
+      "published_at": null,
+      "retrieved_at": "2026-11-05T21:43:27Z",
+      "company_domain": "glean.com",
+      "kind": "primary_documentation",
+      "origin": "live_web",
+      "currentness": "live_retrieved",
+      "excerpt": "Glean's current Agent Builder product describes enterprise-context agents created from natural language, templates or a visual builder. It documents permission-aware company knowledge, branching and looping for complex processes, and model selection for individual process steps. A plausible pressure is maintaining suitable model behavior across different steps; the source does not report an unresolved compatibility problem or an external gateway buying project.",
+      "quote": "Pick the right model for each step of the process.",
+      "quote_allowed": true,
+      "excerpt_kind": "authored_paraphrase; only the authenticated quote field is quoteable"
+    },
+    {
+      "id": "G3",
+      "url": "https://www.glean.com/platform/cost-controls",
+      "title": "AI usage controls and cost governance",
+      "publisher": "Glean",
+      "published_at": null,
+      "retrieved_at": "2026-11-05T21:43:27Z",
+      "company_domain": "glean.com",
+      "kind": "primary_documentation",
+      "origin": "live_web",
+      "currentness": "live_retrieved",
+      "excerpt": "Glean markets monthly usage limits, company-wide and department/user/agent boundaries, visibility into which models and agents drive spend, and team-specific model access. The page marks usage requests and spend forecasting as coming soon, so those must not be represented as delivered. Broader adoption creates a potential cost/quality allocation tradeoff, but Glean already supplies substantial governance. No cost overrun, savings amount or missing-control complaint is established.",
+      "quote": "Set monthly limits and decide what happens when usage reaches them",
+      "quote_allowed": true,
+      "excerpt_kind": "authored_paraphrase; only the authenticated quote field is quoteable"
+    },
+    {
+      "id": "G4",
+      "url": "https://www.glean.com/platform/ai-gateway",
+      "title": "Glean AI Gateway",
+      "publisher": "Glean",
+      "published_at": null,
+      "retrieved_at": "2026-11-05T21:43:27Z",
+      "company_domain": "glean.com",
+      "kind": "primary_documentation",
+      "origin": "live_web",
+      "currentness": "live_retrieved",
+      "excerpt": "Glean markets its own AI Gateway as a control plane for model traffic and MCP tool access. Its current page describes model/user/app consumption visibility, token and tool usage, governed model access, enterprise context and security controls. Restricted-topic controls are marked beta and skills support is described as coming soon. This overlaps a generic external gateway pitch; a specific deployment, partnership or unmet capability would need validation. The product page is not proof of internal production configuration or willingness to buy OpenRouter.",
+      "quote": "One control plane for models and MCP",
+      "quote_allowed": true,
+      "excerpt_kind": "authored_paraphrase; only the authenticated quote field is quoteable"
+    },
+    {
+      "id": "G5",
+      "url": "https://www.glean.com/about",
+      "title": "About Glean \u2014 Founding Team",
+      "publisher": "Glean",
+      "published_at": null,
+      "retrieved_at": "2026-11-05T21:43:27Z",
+      "company_domain": "glean.com",
+      "kind": "primary_documentation",
+      "origin": "live_web",
+      "currentness": "live_retrieved",
+      "excerpt": "The current official Founding Team section lists Arvind Jain as Founder & CEO, Vishwanath T R as Co-founder and CTO, and Tony Gentilcore as Co-founder, Engineering. Vishwanath's biography also describes Technical Infrastructure Lead responsibilities. Those headings support current published names and exact titles; budget ownership, purchasing authority and direct ownership of model infrastructure are role hypotheses, not verified facts. No named functional AI-platform owner was established in this research.",
+      "quote": "",
+      "quote_allowed": false,
+      "excerpt_kind": "authored_paraphrase; only the authenticated quote field is quoteable"
+    },
+    {
+      "id": "G6",
+      "url": "https://status.glean.com/incidents/36c4d510-2140-47f6-868e-efd9738d12f7",
+      "title": "Service degradation from Azure OpenAI causing failed assistant errors",
+      "publisher": "Glean Status",
+      "published_at": "2026-08-31T09:52:17Z",
+      "retrieved_at": "2026-11-05T21:43:27Z",
+      "company_domain": "glean.com",
+      "kind": "incident",
+      "origin": "live_web",
+      "currentness": "live_retrieved",
+      "excerpt": "The resolved August 31 incident explicitly scopes failed assistant responses to BYOK customers using Azure OpenAI. It describes configuring a different default model as a workaround and later states that Azure OpenAI errors subsided. This is evidence of that historical deployment and provider integration, not a present unresolved issue, absent mitigation or a claim about Universal Model Key. Current model-choice documentation must be read beside it.",
+      "quote": "BYOK customers using Azure OpenAI may experience failed assistant responses.",
+      "quote_allowed": true,
+      "excerpt_kind": "authored_paraphrase; only the authenticated quote field is quoteable"
+    }
+  ],
+  "candidate_signal_map": [
+    {
+      "situation": "Per-step model suitability for branching/looping enterprise agents",
+      "source_ids": [
+        "G2",
+        "G1"
+      ],
+      "status": "supported pressure inference, not confirmed complaint"
+    },
+    {
+      "situation": "Cost/quality allocation across departments and growing agent usage",
+      "source_ids": [
+        "G3",
+        "G1"
+      ],
+      "status": "supported pressure inference; existing limits are counterevidence"
+    },
+    {
+      "situation": "Different failover responsibilities for managed and customer-key deployments",
+      "source_ids": [
+        "G1",
+        "G6"
+      ],
+      "status": "documented deployment boundary; present unmet need unknown"
+    }
+  ],
+  "coverage_gaps": [
+    "The separate AWS Bedrock rate-limit incident URL returned HTTP403 during this fresh pass; no new live claim was based on it.",
+    "Official supported-LLMs URL yielded no readable web-tool body; model-choice and other primary pages supplied the current capability evidence.",
+    "No budget, buying intent, active evaluation, verified AI-platform operational owner, financial impact or OpenRouter adoption was established.",
+    "Undated official product and leadership pages were inspected live; their publication dates are unknown."
+  ]
+}

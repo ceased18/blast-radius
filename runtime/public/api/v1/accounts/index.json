@@ -1,0 +1,100 @@
+{
+  "schema_version": "1.0",
+  "snapshot_id": "br-public-0e11ff92aa0be6e1",
+  "scope": "bounded_public_evidence_snapshot",
+  "created_at": "2026-11-05T21:04:04.186066+00:00",
+  "account_count": 6,
+  "accounts": [
+    {
+      "domain": "cartesia.ai",
+      "name": "Cartesia",
+      "path": "accounts/cartesia.ai.json",
+      "url": "https://ceased18.github.io/blast-radius/api/v1/accounts/cartesia.ai.json",
+      "evidence_count": 1,
+      "disposition": "weak_generic_fallback_pitch",
+      "qualification_status": "first_party_documentation_checked",
+      "observed_window": {
+        "earliest_incident_at": "2026-10-22T03:13:52+00:00",
+        "latest_incident_at": "2026-10-22T03:13:52+00:00"
+      },
+      "source_checked_at": "2026-11-05T20:37:49.220078+00:00",
+      "content_sha256": "97cdbab8dd425b7f1f1437958be6c35d3b6c9f2e91e50c8348716d3d583864c4"
+    },
+    {
+      "domain": "github.com",
+      "name": "GitHub",
+      "path": "accounts/github.com.json",
+      "url": "https://ceased18.github.io/blast-radius/api/v1/accounts/github.com.json",
+      "evidence_count": 2,
+      "disposition": "exclude_generic_fallback_campaign",
+      "qualification_status": "first_party_documentation_checked",
+      "observed_window": {
+        "earliest_incident_at": "2026-05-28T18:27:00+00:00",
+        "latest_incident_at": "2026-08-24T06:35:00+00:00"
+      },
+      "source_checked_at": "2026-11-05T20:37:49.220078+00:00",
+      "content_sha256": "ed38b3ec71948ef7c7856a68ce4ca6c0bcb6c088e45a7f3e21b320a2319a2b36"
+    },
+    {
+      "domain": "glean.com",
+      "name": "Glean",
+      "path": "accounts/glean.com.json",
+      "url": "https://ceased18.github.io/blast-radius/api/v1/accounts/glean.com.json",
+      "evidence_count": 2,
+      "disposition": "deployment_specific_qualification_required",
+      "qualification_status": "first_party_documentation_checked",
+      "observed_window": {
+        "earliest_incident_at": "2026-08-31T09:16:22+00:00",
+        "latest_incident_at": "2026-10-12T09:07:45+00:00"
+      },
+      "source_checked_at": "2026-11-05T20:37:49.220078+00:00",
+      "content_sha256": "1cf03a134026b75290430e2ab8dabeae12677ef92b66d6b83b67293cc5066e18"
+    },
+    {
+      "domain": "gorgias.com",
+      "name": "Gorgias",
+      "path": "accounts/gorgias.com.json",
+      "url": "https://ceased18.github.io/blast-radius/api/v1/accounts/gorgias.com.json",
+      "evidence_count": 1,
+      "disposition": "historical_example_only; current_controls_unknown",
+      "qualification_status": "not_researched",
+      "observed_window": {
+        "earliest_incident_at": "2026-05-27T14:20:19+00:00",
+        "latest_incident_at": "2026-05-27T14:20:19+00:00"
+      },
+      "source_checked_at": "2026-11-05T20:26:30.793046+00:00",
+      "content_sha256": "595b5647402a4195f6849ca1c5909b5176ac6271ec9837519e533b092c540c83"
+    },
+    {
+      "domain": "hubspot.com",
+      "name": "HubSpot",
+      "path": "accounts/hubspot.com.json",
+      "url": "https://ceased18.github.io/blast-radius/api/v1/accounts/hubspot.com.json",
+      "evidence_count": 1,
+      "disposition": "historical_example_only; current_controls_unknown",
+      "qualification_status": "not_researched",
+      "observed_window": {
+        "earliest_incident_at": "2025-06-10T06:30:00+00:00",
+        "latest_incident_at": "2025-06-10T06:30:00+00:00"
+      },
+      "source_checked_at": "2026-11-05T20:26:30.792958+00:00",
+      "content_sha256": "6868b8646d26c4abf2be93b6e64a7ec020d48e353a33ec124a3a34c07fb31006"
+    },
+    {
+      "domain": "omni.co",
+      "name": "Omni Analytics",
+      "path": "accounts/omni.co.json",
+      "url": "https://ceased18.github.io/blast-radius/api/v1/accounts/omni.co.json",
+      "evidence_count": 1,
+      "disposition": "qualify_existing_controls_first",
+      "qualification_status": "first_party_documentation_checked",
+      "observed_window": {
+        "earliest_incident_at": "2026-10-05T16:59:32+00:00",
+        "latest_incident_at": "2026-10-05T16:59:32+00:00"
+      },
+      "source_checked_at": "2026-11-05T20:37:49.220078+00:00",
+      "content_sha256": "edfdc24679af9ed0374368072c0822b6bdbb9afbcada162e0d4000a49d7ce8b3"
+    }
+  ],
+  "unknown_company_semantics": "Not in this selected snapshot. This is not evidence of no outages, no fallback or no sales opportunity."
+}

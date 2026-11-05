@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "One-account public PG request",
+  "type": "object",
+  "properties": {
+    "account_domain": {"type": "string", "minLength": 3, "maxLength": 253},
+    "seller": {"type": "string", "minLength": 1, "maxLength": 80, "default": "OpenRouter"},
+    "seller_domain": {"type": "string", "minLength": 3, "maxLength": 253, "default": "openrouter.ai"}
+  },
+  "required": ["account_domain"],
+  "additionalProperties": false
+}
