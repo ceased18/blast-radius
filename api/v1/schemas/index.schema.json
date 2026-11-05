@@ -1,0 +1,131 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ceased18.github.io/blast-radius/api/v1/schemas/index.schema.json",
+  "title": "Blast Radius public index v1",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "snapshot_id": {
+      "type": "string"
+    },
+    "scope": {
+      "const": "bounded_public_evidence_snapshot"
+    },
+    "created_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "account_count": {
+      "const": 6
+    },
+    "accounts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "domain": {
+            "type": "string",
+            "enum": [
+              "cartesia.ai",
+              "github.com",
+              "glean.com",
+              "gorgias.com",
+              "hubspot.com",
+              "omni.co"
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string",
+            "pattern": "^accounts/[a-z0-9.-]+\\.json$"
+          },
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "pattern": "^https://"
+          },
+          "evidence_count": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "disposition": {
+            "type": "string"
+          },
+          "qualification_status": {
+            "type": "string"
+          },
+          "observed_window": {
+            "type": "object",
+            "properties": {
+              "earliest_incident_at": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "format": "date-time"
+              },
+              "latest_incident_at": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "format": "date-time"
+              }
+            },
+            "required": [
+              "earliest_incident_at",
+              "latest_incident_at"
+            ],
+            "additionalProperties": false
+          },
+          "source_checked_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "content_sha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          }
+        },
+        "required": [
+          "domain",
+          "name",
+          "path",
+          "url",
+          "evidence_count",
+          "disposition",
+          "qualification_status",
+          "observed_window",
+          "source_checked_at",
+          "content_sha256"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 6,
+      "maxItems": 6
+    },
+    "unknown_company_semantics": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "snapshot_id",
+    "scope",
+    "created_at",
+    "account_count",
+    "accounts",
+    "unknown_company_semantics"
+  ],
+  "additionalProperties": false
+}

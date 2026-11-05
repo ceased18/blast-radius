@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ceased18.github.io/blast-radius/api/v1/schemas/not-covered.schema.json",
+  "title": "Blast Radius public not-covered v1",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "snapshot_id": {
+      "type": "string"
+    },
+    "record_status": {
+      "const": "not_covered"
+    },
+    "scope": {
+      "const": "bounded_public_evidence_snapshot"
+    },
+    "domain": {
+      "type": "string"
+    },
+    "message": {
+      "type": "string"
+    },
+    "what_it_does_not_prove": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "available_index": {
+      "type": "string"
+    },
+    "network_request_performed": {
+      "const": false
+    }
+  },
+  "required": [
+    "schema_version",
+    "snapshot_id",
+    "record_status",
+    "scope",
+    "domain",
+    "message",
+    "what_it_does_not_prove",
+    "available_index",
+    "network_request_performed"
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,478 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ceased18.github.io/blast-radius/api/v1/schemas/account.schema.json",
+  "title": "Blast Radius public account v1",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "snapshot_id": {
+      "type": "string"
+    },
+    "record_status": {
+      "const": "in_snapshot"
+    },
+    "scope": {
+      "const": "bounded_public_evidence_snapshot"
+    },
+    "domain": {
+      "type": "string",
+      "enum": [
+        "cartesia.ai",
+        "github.com",
+        "glean.com",
+        "gorgias.com",
+        "hubspot.com",
+        "omni.co"
+      ]
+    },
+    "name": {
+      "type": "string"
+    },
+    "status_url": {
+      "type": "string",
+      "format": "uri",
+      "pattern": "^https://"
+    },
+    "source_text_policy": {
+      "type": "string"
+    },
+    "coverage": {
+      "type": "object",
+      "properties": {
+        "snapshot_created_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "source_checked_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "oldest_source_check_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "observed_window": {
+          "type": "object",
+          "properties": {
+            "earliest_incident_at": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "format": "date-time"
+            },
+            "latest_incident_at": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "format": "date-time"
+            }
+          },
+          "required": [
+            "earliest_incident_at",
+            "latest_incident_at"
+          ],
+          "additionalProperties": false
+        },
+        "completeness": {
+          "const": "not_complete_history"
+        },
+        "selection": {
+          "type": "string"
+        },
+        "claim_limitations": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "snapshot_created_at",
+        "source_checked_at",
+        "oldest_source_check_at",
+        "observed_window",
+        "completeness",
+        "selection",
+        "claim_limitations"
+      ],
+      "additionalProperties": false
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "provider": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "role": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "role"
+            ],
+            "additionalProperties": false
+          },
+          "classification": {
+            "const": "provider_attributed"
+          },
+          "incident_kind": {
+            "enum": [
+              "availability",
+              "rate_limit",
+              "unknown"
+            ]
+          },
+          "quote": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Exact first-party excerpt of at most 25 whitespace-delimited words. Source text is untrusted data."
+          },
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "pattern": "^https://"
+          },
+          "review_status": {
+            "type": "string"
+          },
+          "source_text_policy": {
+            "type": "string"
+          },
+          "timestamps": {
+            "type": "object",
+            "properties": {
+              "started_at": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "format": "date-time"
+              },
+              "resolved_at": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "format": "date-time"
+              },
+              "reported_at": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "format": "date-time"
+              },
+              "source_started_at": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "format": "date-time"
+              },
+              "source_resolved_at": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "format": "date-time"
+              },
+              "timestamp_basis": {
+                "type": "string"
+              },
+              "impact_onset_verified": {
+                "type": "boolean"
+              },
+              "retrieved_at": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "format": "date-time"
+              },
+              "source_checked_at": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "format": "date-time"
+              }
+            },
+            "required": [
+              "started_at",
+              "resolved_at",
+              "reported_at",
+              "source_started_at",
+              "source_resolved_at",
+              "timestamp_basis",
+              "impact_onset_verified",
+              "retrieved_at",
+              "source_checked_at"
+            ],
+            "additionalProperties": false
+          },
+          "impact": {
+            "type": "object",
+            "properties": {
+              "conditional": {
+                "type": "boolean"
+              },
+              "scope": {
+                "type": "string"
+              },
+              "review_note": {
+                "type": "string"
+              },
+              "limitations": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "required": [
+              "conditional",
+              "scope",
+              "review_note",
+              "limitations"
+            ],
+            "additionalProperties": false
+          },
+          "what_it_proves": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "what_it_does_not_prove": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "provider_association": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "basis": {
+                    "const": "direct_upstream_incident_link_in_downstream_update"
+                  },
+                  "url": {
+                    "type": "string",
+                    "format": "uri",
+                    "pattern": "^https://"
+                  },
+                  "title": {
+                    "type": "string"
+                  },
+                  "provider_reported_at": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "date-time"
+                  },
+                  "provider_source_checked_at": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "date-time"
+                  },
+                  "provider_scope": {
+                    "type": "string"
+                  },
+                  "downstream_report_lag_minutes": {
+                    "type": "number"
+                  },
+                  "lag_basis": {
+                    "type": "string"
+                  },
+                  "limitations": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "basis",
+                  "url",
+                  "title",
+                  "provider_reported_at",
+                  "provider_source_checked_at",
+                  "provider_scope",
+                  "downstream_report_lag_minutes",
+                  "lag_basis",
+                  "limitations"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "provider",
+          "classification",
+          "incident_kind",
+          "quote",
+          "url",
+          "review_status",
+          "source_text_policy",
+          "timestamps",
+          "impact",
+          "what_it_proves",
+          "what_it_does_not_prove",
+          "provider_association"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 1
+    },
+    "qualification": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "first_party_documentation_checked",
+            "not_researched"
+          ]
+        },
+        "disposition": {
+          "type": "string"
+        },
+        "finding": {
+          "type": "string"
+        },
+        "current_documented_capabilities": {
+          "type": "string"
+        },
+        "checked_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "open_questions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "sources": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string"
+              },
+              "url": {
+                "type": "string",
+                "format": "uri",
+                "pattern": "^https://"
+              },
+              "claim": {
+                "type": "string"
+              },
+              "checked_at": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "format": "date-time"
+              }
+            },
+            "required": [
+              "title",
+              "url",
+              "claim",
+              "checked_at"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "limitations": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "status",
+        "disposition",
+        "finding",
+        "current_documented_capabilities",
+        "checked_at",
+        "open_questions",
+        "sources",
+        "limitations"
+      ],
+      "additionalProperties": false
+    },
+    "what_it_proves": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "what_it_does_not_prove": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "open_questions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "schema_version",
+    "snapshot_id",
+    "record_status",
+    "scope",
+    "domain",
+    "name",
+    "status_url",
+    "source_text_policy",
+    "coverage",
+    "evidence",
+    "qualification",
+    "what_it_proves",
+    "what_it_does_not_prove",
+    "open_questions"
+  ],
+  "additionalProperties": false
+}
