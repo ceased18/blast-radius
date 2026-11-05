@@ -1,0 +1,11 @@
+{
+  "name": "blast-radius-workspace",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs --mode public",
+    "build:private": "node build.mjs --mode private",
+    "check": "node --check src/app.js && node --check src/data.js",
+    "test": "node --test test/*.test.mjs"
+  }
+}

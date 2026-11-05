@@ -1,0 +1,35 @@
+name: Refresh public status evidence (manual)
+on:
+  workflow_dispatch:
+    inputs:
+      domains:
+        description: Maximum public company domains to probe
+        default: '120'
+        type: string
+permissions:
+  contents: read
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install -r requirements.txt
+      - run: python -m unittest discover -s tests -v
+      - run: python -m blast collect --domains "$BLAST_DOMAIN_LIMIT"
+        env:
+          BLAST_DOMAIN_LIMIT: ${{ inputs.domains }}
+      - run: python -m blast classify
+      - run: python -m blast score
+      - run: python -m blast write
+      - run: python -m blast export --public-only
+      - uses: actions/upload-artifact@v4
+        with:
+          name: aggregate-only-export
+          path: site/public/data/public.json
+          retention-days: 7
+# Recurrence and paid LLM work are deliberately not enabled. An ephemeral runner's
+# local SQLite ledger cannot enforce a cross-run weekly cap without durable state.
+# The current local key is never referenced by this workflow.
