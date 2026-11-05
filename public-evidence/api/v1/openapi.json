@@ -1,0 +1,98 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Blast Radius public evidence snapshot",
+    "version": "1.0.0",
+    "description": "Read-only static JSON for six deliberately selected companies. Not live monitoring, enrichment, a complete outage history, or qualified pipeline. No API key required. Local CLI/MCP return structured not_covered for unknown domains; a static URL outside the published index returns the host's ordinary HTTP404, not a health verdict."
+  },
+  "servers": [
+    {
+      "url": "https://ceased18.github.io/blast-radius"
+    }
+  ],
+  "security": [],
+  "paths": {
+    "/api/v1/manifest.json": {
+      "get": {
+        "operationId": "snapshotManifest",
+        "summary": "Read scope, freshness and discovery paths",
+        "responses": {
+          "200": {
+            "description": "Frozen public snapshot manifest",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/accounts/index.json": {
+      "get": {
+        "operationId": "accountIndex",
+        "summary": "Enumerate all six covered domains before lookup",
+        "responses": {
+          "200": {
+            "description": "Complete index of this selected pack, not a market universe",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "./schemas/index.schema.json"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/accounts/{domain}.json": {
+      "get": {
+        "operationId": "companyEvidence",
+        "summary": "Read the published evidence and counterevidence for one known domain",
+        "parameters": [
+          {
+            "name": "domain",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "cartesia.ai",
+                "github.com",
+                "glean.com",
+                "gorgias.com",
+                "hubspot.com",
+                "omni.co"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Bounded account evidence, current-documentation counterevidence, open questions and source timestamps",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "./schemas/account.schema.json"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Domain is not a published static record, or the requested artifact is unavailable. This is not evidence of no incidents, no pain, or no opportunity. Consult the index.",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

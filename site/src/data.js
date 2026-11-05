@@ -41,6 +41,30 @@ export function outreachProvenance(outreach = {}) {
     detail: [outreach.model ? `Served model: ${outreach.model}.` : 'Generated through OpenRouter.', sourceEdits ? `${sourceEdits} source edit${sourceEdits === 1 ? '' : 's'} by an agent.` : '', 'Human review required before outreach.'].filter(Boolean).join(' '),
   };
 }
+export function publicLookup(domain, publishedDomains) {
+  const normalized = String(domain || '').trim().toLowerCase().replace(/\.$/, '').replace(/^www\./, '');
+  if (String(domain || '').length > 253 || !/^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/.test(normalized)) return { status: 'invalid_domain', domain: normalized, message: 'Enter a bare company domain, for example cartesia.ai. URLs, paths, ports, and email addresses are not accepted.' };
+  return publishedDomains.includes(normalized) ? { status: 'in_snapshot', domain: normalized } : { status: 'not_in_snapshot', domain: normalized, message: 'Not in this public snapshot. This is not a finding of no incidents or no opportunity. No live lookup was performed.' };
+}
+export function publicEvidenceBrief(record) {
+  if (!record) return 'No published record selected.';
+  const lines = [`# ${record.name || record.domain} — public evidence brief`, '', `Domain: ${record.domain}`, `Source check: ${record.coverage?.source_checked_at || 'Not recorded'}`, 'Scope: bounded public snapshot; incomplete history. No current buying intent inferred.', '', '## Incident evidence'];
+  for (const evidence of record.evidence || []) {
+    lines.push(`- ${evidence.title || ''}`, `  "${evidence.quote || ''}"`, `  Reported: ${evidence.timestamps?.reported_at || evidence.timestamps?.started_at || 'Not recorded'}`, `  Timestamp basis: ${evidence.timestamps?.timestamp_basis || 'Not recorded'}`, `  ${evidence.url || ''}`);
+    if (evidence.impact?.conditional) lines.push('  Conditional impact wording; actual customer impact is not independently established.');
+    if (evidence.impact?.scope) lines.push(`  Scope: ${evidence.impact.scope}`);
+    for (const limitation of evidence.impact?.limitations || []) lines.push(`  Impact limitation: ${limitation}`);
+    for (const limitation of evidence.what_it_does_not_prove || []) lines.push(`  Does not establish: ${limitation}`);
+    const association = evidence.provider_association;
+    if (association) lines.push(`  Linked upstream source: ${association.url || ''}`, `  Provider scope: ${association.provider_scope || 'Not established'}`, `  Public reporting lag: ${association.downstream_report_lag_minutes ?? 'Not recorded'} minutes. ${association.lag_basis || ''}`, `  Association limits: ${association.limitations || 'No impact propagation inferred.'}`);
+  }
+  lines.push('', '## Current documented capabilities', record.qualification?.finding || record.qualification?.current_documented_capabilities || 'Not researched in this public record. Current architecture is unknown.');
+  for (const source of record.qualification?.sources || []) lines.push(`- ${source.title || 'Product documentation'}: ${source.url}`);
+  if (record.qualification?.disposition) lines.push(`Disposition: ${record.qualification.disposition}`);
+  if (record.qualification?.outreach_guidance) lines.push('', '## Outreach implication', record.qualification.outreach_guidance);
+  lines.push('', '## Claim limits', ...(record.what_it_does_not_prove || []).map(value => `- ${value}`), '', '## Open questions', ...[...(record.open_questions || []), ...(record.qualification?.open_questions || [])].filter((value, index, all) => all.indexOf(value) === index).map(question => `- ${question}`), '', 'An absent public record is unknown, not evidence of no incidents.');
+  return lines.join('\n');
+}
 export function normalize(privateData, publicData) {
   const data = privateData || {};
   return {

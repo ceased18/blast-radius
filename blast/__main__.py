@@ -1,10 +1,20 @@
 import argparse
 import asyncio
-from .collect import collect,import_research
-from .matching import classify
-from .store import connect
+import sys
 
 def main():
+    # Dispatch the headless surface before importing collector dependencies. It
+    # works with the Python standard library alone and never reads .env.
+    if len(sys.argv)>1 and sys.argv[1] in {"lookup","search","status"}:
+        from .agent import main as agent_main
+        raise SystemExit(agent_main(sys.argv[1:]))
+    if len(sys.argv)>1 and sys.argv[1]=="mcp":
+        from .agent_mcp import main as mcp_main
+        mcp_main(sys.argv[2:])
+        return
+    from .collect import collect,import_research
+    from .matching import classify
+    from .store import connect
     p=argparse.ArgumentParser(description="Public AI incident evidence and reviewable account research")
     p.add_argument("command",choices=["collect","classify","score","write","digest","export","import","live"])
     p.add_argument("--db",default=None)

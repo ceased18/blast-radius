@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { date, ageDays, freshness, sourceURL, escapeHTML, minutes, reportingOffset, outreachProvenance } from '../src/data.js';
+import { date, ageDays, freshness, sourceURL, escapeHTML, minutes, reportingOffset, outreachProvenance, publicLookup, publicEvidenceBrief } from '../src/data.js';
 
 test('missing incident timestamps remain unknown instead of becoming 1970 evidence', () => {
   for (const value of [null, undefined, '', 'invalid-date']) {
@@ -45,4 +45,17 @@ test('draft provenance distinguishes accepted OpenRouter-assisted source edits f
   const deterministic = outreachProvenance({ mode: 'deterministic draft; human review required' });
   assert.equal(deterministic.label, 'Deterministic drafts');
   assert.doesNotMatch(deterministic.detail, /Generated through OpenRouter/);
+});
+
+test('public lookup treats uncovered domains as unknown and accepts only bare domain syntax', () => {
+  assert.equal(publicLookup(' www.Cartesia.ai. ', ['cartesia.ai']).status, 'in_snapshot');
+  const absent = publicLookup('example.com', ['cartesia.ai']);
+  assert.equal(absent.status, 'not_in_snapshot');
+  assert.match(absent.message, /not a finding of no incidents/);
+  for (const value of ['', 'https://cartesia.ai', 'cartesia.ai/path', 'a..com', 'user@cartesia.ai', 'cartesia.ai:443']) assert.equal(publicLookup(value, ['cartesia.ai']).status, 'invalid_domain');
+});
+
+test('copying a neutral evidence brief preserves conditional impact, time basis, and claim limits', () => {
+  const brief = publicEvidenceBrief({ domain: 'example.com', name: 'Example', coverage: { source_checked_at: '2026-11-05T00:00:00Z' }, evidence: [{ title: 'May be degraded', quote: 'may see degraded performance', url: 'https://status.example.com/incidents/1', timestamps: { reported_at: '2026-10-22T03:13:52Z', timestamp_basis: 'source_created_at' }, impact: { conditional: true, limitations: ['Customer onset unknown'] }, what_it_does_not_prove: ['No proof of absent fallback'] }], qualification: { finding: 'Existing fallback documented', sources: [{ title: 'Models', url: 'https://docs.example.com/models' }], open_questions: ['Which setup?'] }, what_it_does_not_prove: ['No buying intent'], open_questions: [] });
+  for (const retained of ['source_created_at', 'Conditional impact wording', 'Customer onset unknown', 'No proof of absent fallback', 'No buying intent', 'https://docs.example.com/models', '2026-11-05']) assert.ok(brief.includes(retained), retained);
 });

@@ -5,5 +5,22 @@ description = "First-party AI dependency evidence for account research"
 requires-python = ">=3.11"
 dependencies = ["httpx>=0.28,<1", "python-dotenv>=1,<2"]
 
+[project.optional-dependencies]
+mcp = ["mcp>=2.3,<3"]
+
+[project.scripts]
+blast-evidence = "blast.agent:main"
+blast-evidence-mcp = "blast.agent_mcp:main"
+
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
 [tool.setuptools]
 packages = ["blast"]
+
+[tool.setuptools.data-files]
+"share/blast-radius/public-evidence" = ["public-evidence/llms.txt", "public-evidence/agents.txt"]
+"share/blast-radius/public-evidence/api/v1" = ["public-evidence/api/v1/*.json"]
+"share/blast-radius/public-evidence/api/v1/accounts" = ["public-evidence/api/v1/accounts/*.json"]
+"share/blast-radius/public-evidence/api/v1/schemas" = ["public-evidence/api/v1/schemas/*.json"]
