@@ -32,3 +32,6 @@ runtime/.env
 !runtime/public/data/
 runtime/public/data/*
 !runtime/public/data/public.json
+
+.wrangler/
+.dev.vars*

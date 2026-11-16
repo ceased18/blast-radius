@@ -10,7 +10,7 @@ Production origin: [blast-radius-plans.alluringdoor.chatgpt.site](https://blast-
 - `POST /api/v1/pg-plan` or `/api/pg-plan`: generate or retrieve one canonical account/seller plan.
 - `GET /api/v1/pg-plan/{cache_key}` or `/api/pg-plan/{cache_key}`: read a cached result or processing state without another paid request.
 
-Both path versions use the same cache key and ledger. No visitor credentials are required.
+Both path versions use the same cache key and ledger. A corrected research revision can retry an old failed request without deleting its charges or history. Successful prior-version plans remain available through normal lookup without a new paid run. No visitor credentials are required.
 
 ```json
 {
@@ -20,7 +20,7 @@ Both path versions use the same cache key and ledger. No visitor credentials are
 }
 ```
 
-A custom seller requires its official domain. Inputs are bounded company identifiers, never arbitrary prompts, model selections, tool arguments or fetch URLs. The Worker only sends outbound requests to fixed OpenRouter API endpoints; research domains become filters for OpenRouter's web-search tool, not direct network destinations.
+A custom seller requires its official domain. Inputs are bounded company identifiers, never arbitrary prompts, model selections, tool arguments or fetch URLs. The Worker only sends outbound requests to fixed OpenRouter API endpoints; research domains become filters for OpenRouter's web-search tool, not direct network destinations. A small reviewed association registry can connect an email-only corporate domain to its evidenced public website. For example, first-party Fidelity contact pages establish the fmr.com email-domain association with fidelity.com. This is explicitly labelled as an association, never an HTTP redirect. The requested account domain remains unchanged, actual cited URLs retain their host, and the response discloses the proof and its subsidiary-scope limitation. Unknown or lookalike domains are never guessed.
 
 Responses include `status`, `plan`, dated source metadata, actual served model and usage records, `request_id`, `cache_key`, and budget state. An unsuccessful research or validation result has `plan: null`; it is not replaced with a plan from memory. `research_incomplete` inside a valid plan means one or more of its three pain slots explicitly lacks sufficient evidence.
 
@@ -30,7 +30,7 @@ Two separate research calls restrict their source filters to exactly one company
 
 The six-company public evidence snapshot adds historical incidents and documented existing controls. It cannot substitute for live research. Current documentation does not prove the configuration used during an old incident or a present commercial opportunity.
 
-Full bounded search highlights are intermediate server-side evidence. Public responses expose source URLs, titles, dates, paraphrased claims and at most 25 quoted words per page. Raw highlights are not returned in the public research envelope. This demo leaves persona names `Unknown`; functional titles are hypotheses rather than claims about identified employees. The shared `src/pg_contract.mjs` validates structure and provenance, not the semantic truth of every model inference.
+Full bounded search highlights are intermediate server-side evidence. Public responses expose source URLs, titles, dates, paraphrased claims and at most 25 quoted words per page. Raw highlights are not returned in the public research envelope. Bounded research annotations and source-rejection reasons are retained privately for diagnostics; public failures expose only safe counts and explain that missing usable evidence is a coverage failure, not no need. This demo leaves persona names `Unknown`; functional titles are hypotheses rather than claims about identified employees. The shared `src/pg_contract.mjs` validates structure and provenance, not the semantic truth of every model inference.
 
 Planning uses JSON-object wire mode with the full PG schema once in its prompt, followed by strict local structure/provenance validation. Documentation summaries are labelled notes and cannot be presented as verbatim primary-source quotes. Sanitized provider error details stay in private D1 call metadata, outside public responses.
 
@@ -42,9 +42,9 @@ A conservative filter runs on new drafts and cached reads. Unsupported missing-c
 
 The approved public demo cap is **250,000 micro-USD ($0.25) for its lifetime**, including validation. It does not reset weekly. D1 is the authority; memory, cookies and browser storage are not budget controls.
 
-A new job atomically reserves **170,000 micro-USD** using one conditional SQL insert. Only one paid job may be active. Canonical duplicate requests read the same processing or cached result, including across Worker instances. Completed jobs consume reported charges rounded up to integer micro-USD. Unknown outcomes retain their stored reservation and block new paid jobs. Earlier jobs retain the reservation recorded by their own version. A lower remaining balance can therefore prevent another run even when it is above zero; cached reads stay available.
+A new job atomically reserves **155,000 micro-USD** using one conditional SQL insert. Only one paid job may be active. Canonical duplicate requests read the same processing or cached result, including across Worker instances. Completed jobs consume reported charges rounded up to integer micro-USD. Unknown outcomes retain their stored reservation and block new paid jobs. Earlier jobs retain the reservation recorded by their own version. A lower remaining balance can therefore prevent another run even when it is above zero; cached reads stay available.
 
-The conservative request bound is 165,020 micro-USD:
+The conservative request bound is 150,280 micro-USD:
 
 | Component | Maximum reserved behavior |
 | --- | --- |
@@ -52,7 +52,7 @@ The conservative request bound is 165,020 micro-USD:
 | Research price ceilings | $0.25 per million input tokens and $0.50 per million output tokens |
 | Search | Four Exa searches reserved across model fallbacks at $0.007 each |
 | Planning model work | Two attempts; 28,100 input tokens including overhead allowance and 3,500 output tokens |
-| Planning price ceilings | $0.50 per million input tokens and $3 per million output tokens |
+| Planning price ceilings | $0.30 per million input tokens and $2.50 per million output tokens |
 | Repair | No automatic paid regeneration |
 
 Research models are selected from the current catalog only when their context and supported parameters fit the bound. Planning's complete serialized UTF-8 request is capped at 24,000 bytes, with a conservative protocol overhead allowance. Provider fallback is disabled within each selected model; the request still carries two explicit model fallbacks. Prices are bounded using request `provider.max_price`, not merely catalog floors.

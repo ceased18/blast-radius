@@ -1,6 +1,6 @@
 // Lifetime demo budget. Integer micro-USD; no clock/reset or in-memory authority.
 export const CAP_MICROUSD = 250_000;
-export const REQUEST_RESERVE_MICROUSD = 170_000;
+export const REQUEST_RESERVE_MICROUSD = 155_000;
 export const ACTIVE_STATUSES = ['reserved', 'researching', 'planning', 'unknown'];
 // Eight research attempts (two domain calls x two passes x two models),
 // four conservatively reserved Exa searches across fallbacks, then at
@@ -9,8 +9,8 @@ export const ACTIVE_STATUSES = ['reserved', 'researching', 'planning', 'unknown'
 // be <=24000, plus a conservative 4096-token wire/schema overhead allowance.
 export const BUDGET_PROOF = Object.freeze({
   research: { passes:8,input_tokens:40960,output_tokens:1500,prompt_per_million:0.25,completion_per_million:0.5,searches:4,search_cost_usd:0.007 },
-  planning: { passes:2,input_tokens:28100,output_tokens:3500,prompt_per_million:0.5,completion_per_million:3 },
-  bound_microusd:165020,reserve_microusd:REQUEST_RESERVE_MICROUSD,
+  planning: { passes:2,input_tokens:28100,output_tokens:3500,prompt_per_million:0.3,completion_per_million:2.5 },
+  bound_microusd:150280,reserve_microusd:REQUEST_RESERVE_MICROUSD,
 });
 const COMMITTED = `CASE WHEN status IN ('complete','failed') AND cost_known = 1 THEN actual_cost_microusd ELSE MAX(reserved_microusd,actual_cost_microusd) END`;
 

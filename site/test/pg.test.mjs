@@ -40,3 +40,10 @@ test('PG rendering preserves evidence citations, unknown names, gaps, and a blan
   assert.match(markdown, /### Key Goal for the Week\n\n&nbsp;\n/);
   assert.ok(!markdown.includes('Unverified Person'));
 });
+
+
+test('corporate email-domain resolution is disclosed in UI and copied plan with first-party proof', () => {
+ const result={status:'complete',plan:examplePlan(),research:{account_resolution:{requested_domain:'fmr.com',research_domain:'fidelity.com',checked_at:'2026-11-16',sources:[{title:'Fidelity contacts',url:'https://www.fidelity.com/supplier/contact-us'}]}}};
+ const html=renderPGResult(result), markdown=pgPlanMarkdown(result);
+ for(const content of [html,markdown]){assert.match(content,/fmr.com/);assert.match(content,/fidelity.com/);assert.match(content,/https:\/\/www.fidelity.com\/supplier\/contact-us/);assert.match(content,/buying intent/);}
+});

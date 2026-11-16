@@ -1,4 +1,6 @@
 import { beginCall,finishCall,markCallUnknown } from './budget.mjs';
+import {belongsToDomain,belongsToResearchCompany,excludedCompanyContent} from './domain_resolution.mjs';
+export {belongsToDomain} from './domain_resolution.mjs';
 
 const API = 'https://openrouter.ai/api/v1';
 export class PublicError extends Error {
@@ -20,7 +22,7 @@ function headers(env){return {Authorization:`Bearer ${env.OPENROUTER_API_KEY}`,'
 const price=m=>({prompt:Number(m.pricing?.prompt)*1e6,completion:Number(m.pricing?.completion)*1e6});
 function eligible(model,stage){
   const p=price(model),params=model.supported_parameters || [];
-  const ceilings=stage==='research'?{prompt:0.25,completion:0.5}:{prompt:0.5,completion:3};
+  const ceilings=stage==='research'?{prompt:0.25,completion:0.5}:{prompt:0.3,completion:2.5};
   return typeof model.id==='string'&&!model.id.includes(':')&&!/preview|omni|audio|image|voxtral|embedding/i.test(model.id)
     &&model.architecture?.output_modalities?.length===1&&model.architecture.output_modalities[0]==='text'
     &&params.includes('response_format')&&params.includes('structured_outputs')
@@ -64,7 +66,7 @@ export function basePayload(models,stage,messages,schema){
     // Keep the complex PG schema in the prompt and enforce it locally. The
     // deployed planning provider rejected the otherwise valid strict schema.
     response_format:research?{type:'json_schema',json_schema:{name:'public_research',strict:true,schema}}:{type:'json_object'},
-    provider:{require_parameters:true,allow_fallbacks:false,max_price:{prompt:research?0.25:0.5,completion:research?0.5:3}}};
+    provider:{require_parameters:true,allow_fallbacks:false,max_price:{prompt:research?0.25:0.3,completion:research?0.5:2.5}}};
   if(models.every(m=>m.supported_parameters?.includes('reasoning')))payload.reasoning={effort:'minimal'};
   if(research){
     payload.tools=[{type:'openrouter:web_search',parameters:{engine:'exa',mode:'fast',max_results:2,max_total_results:2,max_uses:1,max_characters:750}}];
@@ -107,8 +109,9 @@ export async function callOpenRouter({db,key,stage,models,payload,fetchImpl,env}
     }
     if(typeof cost!=='number'||!Number.isFinite(cost)||cost<0)throw new PublicError('usage_cost_unresolved',{unknown:true});
     const searches=webSearchCount(result.usage);
+    const privateResearch=stage.startsWith('research')?{research_response:{content:String(message?.content || '').slice(0,4000),annotations:(Array.isArray(message?.annotations)?message.annotations:[]).slice(0,12).map(item=>{const c=item.url_citation || (item.type==='url_citation'?item:{});return {type:item.type,url:String(c.url || '').slice(0,2048),title:String(c.title || '').slice(0,200),content:String(c.content || '').slice(0,750)};})}}:{};
     const outcome={model:result.model || null,generation_id:result.id || null,cost_usd:cost,cost_microusd:Math.ceil(cost*1e6),web_search_requests:searches,
-      fallback_observed:models.slice(1).some(m=>m.id===result.model),metadata:{usage:result.usage,finish_reason:result.choices?.[0]?.finish_reason || null}};
+      fallback_observed:models.slice(1).some(m=>m.id===result.model),metadata:{usage:result.usage,finish_reason:result.choices?.[0]?.finish_reason || null,...privateResearch}};
     await finishCall(db,id,outcome);billed=true;
     return {...outcome,content:parseContent(message?.content),annotations:Array.isArray(message?.annotations)?message.annotations:[]};
   }catch(error){
@@ -117,18 +120,23 @@ export async function callOpenRouter({db,key,stage,models,payload,fetchImpl,env}
     throw new PublicError('request_outcome_unknown',{unknown:!billed});
   }
 }
-export function belongsToDomain(url,domain){try{const p=new URL(url);return p.protocol==='https:'&&!p.username&&!p.password&&!p.port&&(p.hostname===domain||p.hostname.endsWith(`.${domain}`));}catch{return false;}}
-export function liveSources(annotations,{accountDomain,sellerDomain,now}){
-  const sources=[];const seen=new Set();
+export function inspectLiveSources(annotations,{accountDomain,sellerDomain,now}){
+  const sources=[];const seen=new Set(),rejected={missing_citation:0,invalid_url:0,unverified_domain:0,not_company_evidence:0,missing_excerpt:0,short_excerpt:0,duplicate:0};
   for(const item of annotations){
     const c=item.url_citation || (item.type==='url_citation'?item:null);
-    if(!c||typeof c.url!=='string'||seen.has(c.url)||c.url.length>2048)continue;
-    const companyDomain=belongsToDomain(c.url,accountDomain)?accountDomain:belongsToDomain(c.url,sellerDomain)?sellerDomain:null;
+    if(!c||typeof c.url!=='string'){rejected.missing_citation++;continue;}
+    if(c.url.length>2048||!belongsToDomain(c.url,(()=>{try{return new URL(c.url).hostname;}catch{return null;}})())){rejected.invalid_url++;continue;}
+    if(seen.has(c.url)){rejected.duplicate++;continue;}
+    if(excludedCompanyContent(c.url)){rejected.not_company_evidence++;continue;}
+    const companyDomain=belongsToResearchCompany(c.url,accountDomain)?accountDomain:belongsToResearchCompany(c.url,sellerDomain)?sellerDomain:null;
     const content=typeof c.content==='string'?c.content.trim():'';
-    if(!companyDomain||content.length<40)continue;
+    if(!companyDomain){rejected.unverified_domain++;continue;}
+    if(!content){rejected.missing_excerpt++;continue;}
+    if(content.length<40){rejected.short_excerpt++;continue;}
     seen.add(c.url);sources.push({id:`live-${sources.length+1}`,url:c.url,title:String(c.title || new URL(c.url).hostname).slice(0,200),publisher:new URL(c.url).hostname,published_at:null,
       retrieved_at:now,quote:'',excerpt:content.slice(0,750),quote_allowed:true,origin:'live_web',currentness:'live_retrieved',company_domain:companyDomain});
     if(sources.length>=4)break;
   }
-  return sources;
+  return {sources,diagnostics:{annotation_count:annotations.length,accepted_source_count:sources.length,rejected}};
 }
+export function liveSources(annotations,options){return inspectLiveSources(annotations,options).sources;}
